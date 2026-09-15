@@ -41,8 +41,9 @@
 }
 
 /*
- * Dark, near-black cyberpunk base with a magenta/purple primary accent and
- * a cyan secondary accent for contrast — kept restrained so it reads clean.
+ * Dark, near-black cyberpunk base with a neon-yellow primary accent and a
+ * bright sky-blue secondary accent for contrast — kept restrained so it
+ * reads clean.
  */
 :root {
   --radius: 0.625rem;
@@ -53,34 +54,80 @@
   --card: oklch(0.14 0.03 290);
   --card-foreground: oklch(0.96 0.01 290);
 
-  --primary: oklch(0.65 0.27 322);
-  --primary-foreground: oklch(0.98 0.01 322);
+  --primary: oklch(0.87 0.19 96);
+  --primary-foreground: oklch(0.14 0.02 96);
 
-  --secondary: oklch(0.72 0.19 200);
-  --secondary-foreground: oklch(0.12 0.02 200);
+  --secondary: oklch(0.82 0.13 210);
+  --secondary-foreground: oklch(0.14 0.02 210);
 
   --muted: oklch(0.22 0.02 290);
   --muted-foreground: oklch(0.68 0.02 290);
 
-  --accent: oklch(0.72 0.19 200);
-  --accent-foreground: oklch(0.12 0.02 200);
+  --accent: oklch(0.82 0.13 210);
+  --accent-foreground: oklch(0.14 0.02 210);
 
   --destructive: oklch(0.6 0.24 25);
   --destructive-foreground: oklch(0.98 0.01 25);
 
   --border: oklch(0.27 0.03 290);
   --input: oklch(0.27 0.03 290);
-  --ring: oklch(0.65 0.27 322);
+  --ring: oklch(0.87 0.19 96);
 }
 
+/* Dark background with a simple dot grid instead of a gradient, faded out
+   to solid black toward the bottom of the page. The fade layer is sized to
+   the full page (not tiled) and painted on top of the tiled dot layer. */
 body {
   background-color: var(--background);
   color: var(--foreground);
+  background-image:
+    linear-gradient(to bottom, transparent 0%, transparent 20%, var(--background) 50%),
+    radial-gradient(
+      circle,
+      color-mix(in oklch, var(--primary) 24%, transparent) 1.5px,
+      transparent 1.5px
+    );
+  background-size:
+    100% 100%,
+    28px 28px;
+  background-repeat: no-repeat, repeat;
 }
 
-/* Subtle neon glow, used sparingly on primary CTAs and focus rings. */
+/* Subtle neon glow for elements that do NOT also use .clip-corner (e.g. the
+   hero heading). Safe to use filter here since there's no clip-path on the
+   same element to interact with. */
 .glow-primary {
-  box-shadow: 0 0 0 1px var(--primary), 0 0 24px -4px var(--primary);
+  filter: drop-shadow(0 0 3px var(--primary)) drop-shadow(0 0 14px var(--primary));
+}
+
+.glow-primary-subtle {
+  filter: drop-shadow(0 0 1px var(--primary)) drop-shadow(0 0 8px var(--primary));
+}
+
+/* Glow for buttons that also use .clip-corner. Deliberately box-shadow +
+   border-radius instead of filter: drop-shadow. In theory drop-shadow should
+   follow an element's own clip-path (see .glow-primary above), but WebKit
+   clips filter output to clip-path too, making the glow disappear entirely
+   on Safari. box-shadow + border-radius has no such inconsistency, so this
+   is applied to the *unclipped* wrapper around the clipped shape (see
+   includes/button.html) — a softly rounded corner instead of a sharp
+   chamfer, but reliable everywhere. */
+.glow-primary-clip {
+  border-bottom-right-radius: 14px;
+  box-shadow: 0 0 24px -4px var(--primary);
+}
+
+/* Chamfers the bottom-right corner off at a slope instead of a square/
+   rounded corner — used on highlighted buttons for a cyberpunk-panel look. */
+.clip-corner {
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 10px),
+    calc(100% - 10px) 100%,
+    0 100%
+  );
+  border-radius: 0;
 }
 
 /* Minimal styling for Wagtail RichTextField output (plain p/h2/h3/ul/a tags). */

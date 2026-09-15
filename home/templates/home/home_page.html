@@ -3,12 +3,11 @@
 
 {% block content %}
 <section class="relative overflow-hidden">
-    <div class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_-10%,color-mix(in_oklch,var(--primary)_25%,transparent),transparent_60%)]"></div>
     <div class="mx-auto max-w-5xl px-6 py-24 sm:py-32">
         {% if page.subheading %}
         <p class="mb-4 font-mono text-sm uppercase tracking-widest text-secondary">{{ page.subheading }}</p>
         {% endif %}
-        <h1 class="font-display text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
+        <h1 class="font-display text-4xl font-bold tracking-tight text-foreground sm:text-6xl text-primary glow-primary-subtle">
             {{ page.heading|default:page.title }}
         </h1>
         {% if page.intro %}
@@ -19,7 +18,7 @@
 
         <div class="mt-10 flex flex-wrap items-center gap-4">
             {% if projects_index %}
-                {% include "includes/button.html" with href=projects_index.url text="View projects" variant="primary" %}
+                {% include "includes/button.html" with href=projects_index.url text="View projects" variant="primary"  %}
             {% endif %}
             {% if page.resume_document %}
                 {% include "includes/button.html" with href=page.resume_document.url text="Download resume" variant="outline" %}

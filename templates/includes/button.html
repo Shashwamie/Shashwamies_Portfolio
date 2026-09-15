@@ -1,10 +1,20 @@
 {% comment %}
 Usage: {% include "includes/button.html" with href="/projects/" text="View projects" variant="primary" %}
 variant: primary (default) | outline | ghost
+Optional: target="_blank"
+
+Two-layer markup for the primary variant: box-shadow can't be shaped to
+follow clip-corner's chamfer directly (a shape's own clip-path clips its own
+box-shadow to nothing), so the glow (.glow-primary-clip) lives on the
+unclipped outer <a>, while the chamfer + fill (.clip-corner) live on the
+inner <span>.
 {% endcomment %}
 {% with variant=variant|default:"primary" %}
 <a href="{{ href }}"
-   class="inline-flex items-center justify-center gap-2 rounded-md px-5 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background {% if variant == 'primary' %}bg-primary text-primary-foreground hover:opacity-90 glow-primary{% elif variant == 'outline' %}border border-border bg-transparent text-foreground hover:bg-muted{% else %}text-foreground hover:bg-muted{% endif %}">
-    {{ text }}
+   {% if target %}target="{{ target }}" rel="noopener noreferrer"{% endif %}
+   class="group relative inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background {% if variant == 'primary' %}glow-primary-clip{% endif %}">
+    <span class="flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium transition-colors {% if variant == 'primary' %}clip-corner bg-primary text-primary-foreground group-hover:opacity-90{% elif variant == 'outline' %}clip-corner border border-border bg-transparent text-foreground group-hover:bg-muted{% else %}rounded-md text-foreground group-hover:bg-muted{% endif %}">
+        {{ text }}
+    </span>
 </a>
 {% endwith %}

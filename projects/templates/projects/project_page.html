@@ -12,10 +12,10 @@
 
     <div class="mt-6 flex flex-wrap items-center gap-3">
         {% if page.github_url %}
-            {% include "includes/button.html" with href=page.github_url text="View code" variant="outline" %}
+            {% include "includes/button.html" with href=page.github_url text="View code" variant="outline" target="_blank" %}
         {% endif %}
         {% if page.live_url %}
-            {% include "includes/button.html" with href=page.live_url text="Live site" variant="primary" %}
+            {% include "includes/button.html" with href=page.live_url text="Live site" variant="primary" target="_blank" %}
         {% endif %}
     </div>
 
