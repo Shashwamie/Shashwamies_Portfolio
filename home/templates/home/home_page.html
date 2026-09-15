@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags wagtailimages_tags %}
+
+{% block content %}
+<section class="relative overflow-hidden">
+    <div class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_-10%,color-mix(in_oklch,var(--primary)_25%,transparent),transparent_60%)]"></div>
+    <div class="mx-auto max-w-5xl px-6 py-24 sm:py-32">
+        {% if page.subheading %}
+        <p class="mb-4 font-mono text-sm uppercase tracking-widest text-secondary">{{ page.subheading }}</p>
+        {% endif %}
+        <h1 class="font-display text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
+            {{ page.heading|default:page.title }}
+        </h1>
+        {% if page.intro %}
+        <div class="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+            {{ page.intro|richtext }}
+        </div>
+        {% endif %}
+
+        <div class="mt-10 flex flex-wrap items-center gap-4">
+            {% if projects_index %}
+                {% include "includes/button.html" with href=projects_index.url text="View projects" variant="primary" %}
+            {% endif %}
+            {% if page.resume_document %}
+                {% include "includes/button.html" with href=page.resume_document.url text="Download resume" variant="outline" %}
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{% if featured_projects %}
+<section class="border-t border-border">
+    <div class="mx-auto max-w-5xl px-6 py-20">
+        <h2 class="font-display text-2xl font-semibold tracking-tight">Featured projects</h2>
+        <div class="mt-8 grid gap-6 sm:grid-cols-2">
+            {% for project in featured_projects %}
+            <a href="{% pageurl project %}" class="group rounded-lg border border-border bg-card p-6 shadow-sm transition-colors hover:border-primary/60">
+                {% if project.cover_image %}
+                    {% image project.cover_image fill-640x360 class="mb-4 aspect-video w-full rounded-md object-cover" %}
+                {% endif %}
+                <h3 class="font-display text-lg font-semibold text-foreground group-hover:text-primary">
+                    {{ project.title }}
+                </h3>
+                <p class="mt-2 text-sm text-muted-foreground">{{ project.summary }}</p>
+                {% if project.tech_stack_list %}
+                <div class="mt-4 flex flex-wrap gap-2">
+                    {% for tech in project.tech_stack_list %}
+                        {% include "includes/badge.html" with text=tech %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

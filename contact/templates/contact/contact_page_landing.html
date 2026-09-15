@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags %}
+
+{% block content %}
+<section class="mx-auto max-w-2xl px-6 py-24 text-center">
+    <h1 class="font-display text-3xl font-bold tracking-tight">Thanks!</h1>
+    <div class="richtext mt-4 text-muted-foreground">
+        {% if page.thank_you_text %}
+            {{ page.thank_you_text|richtext }}
+        {% else %}
+            <p>Your message has been sent.</p>
+        {% endif %}
+    </div>
+    <div class="mt-8">
+        {% include "includes/button.html" with href=page.url text="Back to contact" variant="outline" %}
+    </div>
+</section>
+{% endblock %}

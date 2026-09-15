@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags wagtailimages_tags %}
+
+{% block content %}
+<section class="mx-auto max-w-3xl px-6 py-16 sm:py-24">
+    <h1 class="font-display text-3xl font-bold tracking-tight sm:text-4xl">{{ page.title }}</h1>
+
+    <div class="mt-10 flex flex-col gap-10 sm:flex-row sm:items-start">
+        {% if page.photo %}
+        {% image page.photo fill-320x320 class="h-40 w-40 shrink-0 rounded-lg border border-border object-cover" %}
+        {% endif %}
+
+        <div class="flex-1">
+            {% if page.bio %}
+            <div class="richtext text-foreground">{{ page.bio|richtext }}</div>
+            {% endif %}
+
+            {% if page.skills %}
+            <div class="mt-8 flex flex-wrap gap-2">
+                {% for block in page.skills %}
+                    {% include "includes/badge.html" with text=block.value %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if page.resume_document %}
+            <div class="mt-8">
+                {% include "includes/button.html" with href=page.resume_document.url text="Download resume" variant="primary" %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,27 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Django
+db.sqlite3
+media/
+staticfiles/
+*.log
+
+# Environment variables
+.env
+
+# Node / Tailwind
+node_modules/
+theme/static_src/node_modules/
+theme/static/css/dist/
+
+# OS
+.DS_Store

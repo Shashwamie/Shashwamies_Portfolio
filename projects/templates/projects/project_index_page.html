@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags wagtailimages_tags %}
+
+{% block content %}
+<section class="mx-auto max-w-5xl px-6 py-16 sm:py-24">
+    <h1 class="font-display text-3xl font-bold tracking-tight sm:text-4xl">{{ page.title }}</h1>
+    {% if page.intro %}
+    <div class="mt-4 max-w-2xl text-muted-foreground">{{ page.intro|richtext }}</div>
+    {% endif %}
+
+    {% if tag %}
+    <div class="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
+        Filtering by {% include "includes/badge.html" with text=tag %}
+        <a href="{{ page.url }}" class="text-primary hover:underline">Clear</a>
+    </div>
+    {% endif %}
+
+    {% if projects %}
+    <div class="mt-10 grid gap-6 sm:grid-cols-2">
+        {% for project in projects %}
+        <a href="{% pageurl project %}" class="group rounded-lg border border-border bg-card p-6 shadow-sm transition-colors hover:border-primary/60">
+            {% if project.cover_image %}
+                {% image project.cover_image fill-640x360 class="mb-4 aspect-video w-full rounded-md object-cover" %}
+            {% endif %}
+            <h2 class="font-display text-lg font-semibold text-foreground group-hover:text-primary">
+                {{ project.title }}
+            </h2>
+            <p class="mt-2 text-sm text-muted-foreground">{{ project.summary }}</p>
+            {% if project.tech_stack_list %}
+            <div class="mt-4 flex flex-wrap gap-2">
+                {% for tech in project.tech_stack_list %}
+                    {% include "includes/badge.html" with text=tech %}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="mt-10 text-muted-foreground">No projects to show yet — add some in the Wagtail admin.</p>
+    {% endif %}
+</section>
+{% endblock %}

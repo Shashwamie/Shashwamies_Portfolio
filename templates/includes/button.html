@@ -1,0 +1,10 @@
+{% comment %}
+Usage: {% include "includes/button.html" with href="/projects/" text="View projects" variant="primary" %}
+variant: primary (default) | outline | ghost
+{% endcomment %}
+{% with variant=variant|default:"primary" %}
+<a href="{{ href }}"
+   class="inline-flex items-center justify-center gap-2 rounded-md px-5 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background {% if variant == 'primary' %}bg-primary text-primary-foreground hover:opacity-90 glow-primary{% elif variant == 'outline' %}border border-border bg-transparent text-foreground hover:bg-muted{% else %}text-foreground hover:bg-muted{% endif %}">
+    {{ text }}
+</a>
+{% endwith %}
