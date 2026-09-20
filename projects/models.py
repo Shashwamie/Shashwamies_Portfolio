@@ -1,3 +1,4 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from modelcluster.contrib.taggit import ClusterTaggableManager
 from modelcluster.fields import ParentalKey
@@ -50,6 +51,19 @@ class ProjectPage(Page):
         on_delete=models.SET_NULL,
         related_name="+",
     )
+    background_image = models.ForeignKey(
+        "wagtailimages.Image",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Optional background image shown behind this project's page. Falls back to the site's default background if left blank.",
+    )
+    background_overlay_opacity = models.PositiveIntegerField(
+        default=70,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        help_text="Darkness of the overlay on top of the background image: 0 = full image, no darkening, 100 = fully dark. Only applies when a background image is set.",
+    )
     tech_stack = ClusterTaggableManager(through=ProjectPageTag, blank=True)
     body = StreamField(
         [
@@ -71,6 +85,8 @@ class ProjectPage(Page):
     content_panels = Page.content_panels + [
         FieldPanel("summary"),
         FieldPanel("cover_image"),
+        FieldPanel("background_image"),
+        FieldPanel("background_overlay_opacity"),
         FieldPanel("tech_stack"),
         FieldPanel("body"),
         MultiFieldPanel(
