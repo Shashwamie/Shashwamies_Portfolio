@@ -54,10 +54,10 @@
   --card: oklch(0.14 0.03 290);
   --card-foreground: oklch(0.96 0.01 290);
 
-  --primary: oklch(0.87 0.19 96);
+  --primary: rgba(255, 255, 4, 0.9);
   --primary-foreground: oklch(0.14 0.02 96);
 
-  --secondary: oklch(0.82 0.13 210);
+  --secondary: oklch(38.666% 0.00004 271.152);
   --secondary-foreground: oklch(0.14 0.02 210);
 
   --muted: oklch(0.22 0.02 290);

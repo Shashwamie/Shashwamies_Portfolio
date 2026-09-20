@@ -8,6 +8,11 @@ class HomePage(Page):
     heading = models.CharField(
         max_length=255, blank=True, help_text="Big hero heading, e.g. your name."
     )
+    aka_name = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text='Optional "aka" line shown under the heading, e.g. aka "Shashwamie".',
+    )
     subheading = models.CharField(
         max_length=255, blank=True, help_text="Short role/title line under the heading."
     )
@@ -23,6 +28,7 @@ class HomePage(Page):
 
     content_panels = Page.content_panels + [
         FieldPanel("heading"),
+        FieldPanel("aka_name"),
         FieldPanel("subheading"),
         FieldPanel("intro"),
         FieldPanel("resume_document"),
