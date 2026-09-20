@@ -113,7 +113,7 @@ body {
    includes/button.html) — a softly rounded corner instead of a sharp
    chamfer, but reliable everywhere. */
 .glow-primary-clip {
-  border-bottom-right-radius: 14px;
+  border-bottom-right-radius: 25px;
   box-shadow: 0 0 24px -4px var(--primary);
 }
 
@@ -123,8 +123,8 @@ body {
   clip-path: polygon(
     0 0,
     100% 0,
-    100% calc(100% - 10px),
-    calc(100% - 10px) 100%,
+    100% calc(100% - 16px),
+    calc(100% - 16px) 100%,
     0 100%
   );
   border-radius: 0;

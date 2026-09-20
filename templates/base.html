@@ -23,12 +23,24 @@
                 Shashwamie<span class="text-primary">.</span>dev
             </a>
 
-            <nav class="hidden items-center gap-8 md:flex">
-                {% for nav_page in nav_pages %}
-                <a href="{% pageurl nav_page %}"
-                   class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-                    {{ nav_page.title }}
+            <nav class="mr-4 hidden items-center gap-10 md:flex">
+                <a href="{% if nav_home %}{% pageurl nav_home %}{% else %}/{% endif %}"
+                   class="text-sm font-medium text-foreground transition-colors hover:text-primary">
+                    Home
                 </a>
+                {% for nav_page in nav_pages %}
+                <div class="relative" data-dropdown>
+                    <button type="button" data-dropdown-trigger aria-expanded="false"
+                            class="flex items-center gap-1 text-sm font-medium text-foreground transition-colors hover:text-primary">
+                        {{ nav_page.title }}
+                        <svg data-dropdown-chevron xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <div data-dropdown-panel
+                         class="invisible absolute {% if forloop.last %}right-0{% else %}left-0{% endif %} top-full mt-2 min-w-40 rounded-md border border-primary/35 bg-background/70 py-2 opacity-0 shadow-lg backdrop-blur-sm transition-opacity">
+                        <a href="{% pageurl nav_page %}" class="block px-4 py-2 text-sm text-foreground hover:bg-muted hover:text-primary">Overview</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-foreground hover:bg-muted hover:text-primary">Coming soon</a>
+                    </div>
+                </div>
                 {% endfor %}
             </nav>
 
@@ -38,10 +50,21 @@
         </div>
 
         <nav id="mobile-nav" class="hidden flex-col gap-1 border-t border-border px-6 py-3 md:hidden">
-            {% for nav_page in nav_pages %}
-            <a href="{% pageurl nav_page %}" class="rounded-md px-2 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-primary">
-                {{ nav_page.title }}
+            <a href="{% if nav_home %}{% pageurl nav_home %}{% else %}/{% endif %}"
+               class="rounded-md px-2 py-2 text-sm font-medium text-foreground hover:bg-muted hover:text-primary">
+                Home
             </a>
+            {% for nav_page in nav_pages %}
+            <details class="group">
+                <summary class="flex cursor-pointer list-none items-center justify-between rounded-md px-2 py-2 text-sm font-medium text-foreground hover:bg-muted hover:text-primary">
+                    {{ nav_page.title }}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </summary>
+                <div class="ml-2 flex flex-col gap-1 border-l border-border pl-3">
+                    <a href="{% pageurl nav_page %}" class="rounded-md px-2 py-2 text-sm text-muted-foreground hover:text-primary">Overview</a>
+                    <a href="#" class="rounded-md px-2 py-2 text-sm text-muted-foreground hover:text-primary">Coming soon</a>
+                </div>
+            </details>
             {% endfor %}
         </nav>
     </header>
@@ -70,6 +93,39 @@
             const isOpen = mobileNav.classList.toggle("flex");
             mobileNav.classList.toggle("hidden");
             navToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        });
+
+        const dropdowns = Array.from(document.querySelectorAll("[data-dropdown]"));
+        const closeDropdown = (dropdown) => {
+            dropdown.querySelector("[data-dropdown-trigger]").setAttribute("aria-expanded", "false");
+            dropdown.querySelector("[data-dropdown-panel]").classList.add("invisible", "opacity-0");
+            dropdown.querySelector("[data-dropdown-chevron]").classList.remove("rotate-180");
+        };
+        const openDropdown = (dropdown) => {
+            dropdown.querySelector("[data-dropdown-trigger]").setAttribute("aria-expanded", "true");
+            dropdown.querySelector("[data-dropdown-panel]").classList.remove("invisible", "opacity-0");
+            dropdown.querySelector("[data-dropdown-chevron]").classList.add("rotate-180");
+        };
+        dropdowns.forEach((dropdown) => {
+            dropdown.querySelector("[data-dropdown-trigger]").addEventListener("click", () => {
+                const isOpen = dropdown.querySelector("[data-dropdown-trigger]").getAttribute("aria-expanded") === "true";
+                dropdowns.forEach(closeDropdown);
+                if (!isOpen) {
+                    openDropdown(dropdown);
+                }
+            });
+        });
+        document.addEventListener("click", (event) => {
+            dropdowns.forEach((dropdown) => {
+                if (!dropdown.contains(event.target)) {
+                    closeDropdown(dropdown);
+                }
+            });
+        });
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                dropdowns.forEach(closeDropdown);
+            }
         });
     </script>
     {% block extra_js %}{% endblock %}
