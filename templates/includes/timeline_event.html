@@ -1,0 +1,13 @@
+{% comment %}
+Usage: {% include "includes/timeline_event.html" with event=event %}
+{% endcomment %}
+<div class="rounded-lg border bg-card/60 p-4 {% if event.event_type == 'work' %}border-primary{% else %}border-accent{% endif %}">
+    <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium {% if event.event_type == 'work' %}border-primary/40 text-primary{% else %}border-accent/40 text-accent{% endif %}">
+        {{ event.get_event_type_display }}
+    </span>
+    <h3 class="mt-2 font-display text-lg font-semibold text-foreground">{{ event.organization }}</h3>
+    <p class="mt-1 font-mono text-xs uppercase tracking-widest text-muted-foreground">{{ event.duration_display }}</p>
+    {% if event.description %}
+    <p class="mt-2 text-sm text-muted-foreground">{{ event.description }}</p>
+    {% endif %}
+</div>

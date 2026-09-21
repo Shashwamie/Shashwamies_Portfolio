@@ -17,7 +17,7 @@
     {% block extra_head %}{% endblock %}
 </head>
 <body class="min-h-screen bg-background text-foreground font-sans antialiased" {% block body_style %}{% endblock %}>
-    <header class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header class="sticky top-0 z-50 border-b border-border bg-background/50 backdrop-blur-xs  ">
         <div class="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
             <a href="{% if nav_home %}{% pageurl nav_home %}{% else %}/{% endif %}" class="font-display text-lg font-semibold tracking-tight text-foreground hover:text-primary transition-colors">
                 Shashwamie<span class="text-primary">.</span>dev
@@ -38,7 +38,11 @@
                     <div data-dropdown-panel
                          class="invisible absolute {% if forloop.last %}right-0{% else %}left-0{% endif %} top-full mt-2 min-w-40 rounded-md border border-primary/35 bg-background/70 py-2 opacity-0 shadow-lg backdrop-blur-sm transition-opacity">
                         <a href="{% pageurl nav_page %}" class="block px-4 py-2 text-sm text-foreground hover:bg-muted hover:text-primary">Overview</a>
+                        {% if nav_page.slug == "about" and timeline_page %}
+                        <a href="{% pageurl timeline_page %}" class="block px-4 py-2 text-sm text-foreground hover:bg-muted hover:text-primary">Timeline</a>
+                        {% else %}
                         <a href="#" class="block px-4 py-2 text-sm text-foreground hover:bg-muted hover:text-primary">Coming soon</a>
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
@@ -62,7 +66,11 @@
                 </summary>
                 <div class="ml-2 flex flex-col gap-1 border-l border-border pl-3">
                     <a href="{% pageurl nav_page %}" class="rounded-md px-2 py-2 text-sm text-muted-foreground hover:text-primary">Overview</a>
+                    {% if nav_page.slug == "about" and timeline_page %}
+                    <a href="{% pageurl timeline_page %}" class="rounded-md px-2 py-2 text-sm text-muted-foreground hover:text-primary">Timeline</a>
+                    {% else %}
                     <a href="#" class="rounded-md px-2 py-2 text-sm text-muted-foreground hover:text-primary">Coming soon</a>
+                    {% endif %}
                 </div>
             </details>
             {% endfor %}
