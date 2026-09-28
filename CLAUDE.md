@@ -115,7 +115,13 @@ Page tree is enforced via each model's `parent_page_types`/`subpage_types`:
   as well as looks), so re-opening the pack draws a new random set without
   a page reload. Odds depend on how many Hobby rows share each tier, not
   just the weights: adding a new legendary raises the chance of pulling
-  *some* legendary.
+  *some* legendary. A "Show all hobbies" button (`data-hobby-show-all`,
+  below the pack/cards) skips the draw: `dealAllCards()` deals every card
+  sorted rarest-first and auto-flips them face-up. All deal/flip/tear
+  `setTimeout`s go through `pendingTimers` and are cancelled by
+  `clearTable()`, so switching views mid-animation (e.g. "Show all"
+  clicked mid-tear) can't be overwritten by a stale callback — route any
+  new delayed callback there too.
   Card backs are identical for every hobby (no hobby-specific markup) so
   the back never hints at what's inside — only the flipped front does.
 
@@ -241,8 +247,9 @@ bottom-only `border-radius`, `.hobby-pack-lid` has `border-bottom-color:
 transparent` and a top-only `border-radius` — so at rest, with the lid
 sitting just above the body, their matching side borders line up into one
 continuous silhouette and the transparent top/bottom edges read as the
-seam between them, rather than needing a fake torn edge. A small pulsing
-glow line (`.hobby-pack-lid::after`) traces that seam on the lid's side to
+seam between them, rather than needing a fake torn edge. A glow line
+(`.hobby-pack-lid::after`) with a bright spot sweeping left → right along the
+lid's side of that seam (`hobby-pack-lid-sweep`, same direction as the drag) to
 hint it's the part you pull. The lid also rests slightly rotated
 (`translateY(-5px) rotate(3deg)`, see `.hobby-pack-lid` in styles.css) so
 it doesn't look perfectly seated even before you touch it. Dragging just
@@ -264,7 +271,7 @@ clears that inline `transform`/`transition` override, letting the
 the old clip-path version, a `translate`/`rotate` interpolates smoothly no
 matter the start/end values, no point-count mismatch to work around).
 Crossing the threshold instead adds `.hobby-pack.is-torn`, which flings
-the lid further off (its own transform in that state, pulsing seam-line
+the lid further off (its own transform in that state, glowing seam-line
 included since it's a pseudo-element on the same fading/moving lid)
 followed shortly by the body fading out, before the pack is hidden and
 cards are dealt. The lid rotates clockwise (positive degrees — left edge

@@ -270,19 +270,39 @@ body {
   color: var(--rarity-color);
 }
 
-.hobby-card[data-rarity="legendary"] .hobby-card-front::after {
+/* Shared diagonal shine used by legendary cards and the closed pack (see
+   .hobby-pack-body::after). The gradient eases in/out over many stops —
+   roughly a bell curve — instead of a 3-stop transparent/peak/transparent
+   ramp, which rose and cut off linearly and read as a hard-edged band.
+   Each user sets its own `--shimmer-peak` (max white alpha). */
+.hobby-card[data-rarity="legendary"] .hobby-card-front::after,
+.hobby-pack-body::after {
   content: "";
   position: absolute;
   inset: 0;
   background: linear-gradient(
     115deg,
-    transparent 40%,
-    rgba(255, 255, 255, 0.35) 50%,
-    transparent 60%
+    transparent 30%,
+    rgb(255 255 255 / calc(var(--shimmer-peak) * 0.08)) 36%,
+    rgb(255 255 255 / calc(var(--shimmer-peak) * 0.3)) 42%,
+    rgb(255 255 255 / calc(var(--shimmer-peak) * 0.75)) 47%,
+    rgb(255 255 255 / var(--shimmer-peak)) 50%,
+    rgb(255 255 255 / calc(var(--shimmer-peak) * 0.75)) 53%,
+    rgb(255 255 255 / calc(var(--shimmer-peak) * 0.3)) 58%,
+    rgb(255 255 255 / calc(var(--shimmer-peak) * 0.08)) 64%,
+    transparent 70%
   );
   background-size: 250% 250%;
-  animation: hobby-card-shimmer 2.5s linear infinite;
+  /* Must not tile: the 115deg band doesn't line up across tile edges, so a
+     repeat drew a neighbouring tile's band with a sharp horizontal/vertical
+     seam mid-card. Unrepeated, the tile's transparent ends hide its edges,
+     and it still covers the band's whole path at every keyframe position. */
+  background-repeat: no-repeat;
   pointer-events: none;
+}
+.hobby-card[data-rarity="legendary"] .hobby-card-front::after {
+  --shimmer-peak: 0.18;
+  animation: hobby-card-shimmer 2.5s linear infinite;
 }
 @keyframes hobby-card-shimmer {
   0% {
@@ -342,19 +362,10 @@ body {
      already used for legendary-rarity cards (see .hobby-card-shimmer)
      rather than the heavier gradient-wash treatment that was tried and
      dropped for the pack earlier — this is just a slow, subtle light pass,
-     not a foil material. */
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    115deg,
-    transparent 40%,
-    rgba(255, 255, 255, 0.28) 50%,
-    transparent 60%
-  );
-  background-size: 250% 250%;
+     not a foil material. Gradient/geometry are shared with legendary
+     cards (see the rule above .hobby-card-shimmer). */
+  --shimmer-peak: 0.18;
   animation: hobby-card-shimmer 6s linear infinite;
-  pointer-events: none;
 }
 .hobby-pack.is-torn .hobby-pack-body {
   opacity: 0;
@@ -368,27 +379,42 @@ body {
   border-radius: 20px 20px 0 0;
 }
 .hobby-pack-lid::after {
-  /* A soft pulsing glow tracing the lid's open (borderless) bottom edge —
-     the edge that no longer has a solid border since it's meant to read as
-     already separated from the body — to hint that it's the part you pull. */
+  /* A glow sweeping left → right along the lid's open (borderless) bottom
+     edge — the edge that no longer has a solid border since it's meant to
+     read as already separated from the body — to hint that it's the part
+     you pull, and which way (same direction as the drag). Two layers: a
+     bright gradient spot that travels, over a dim solid line so the seam
+     stays visible between sweeps. The glow is `filter: drop-shadow`, not
+     `box-shadow`, so it follows the moving spot's alpha instead of lighting
+     the whole line (safe here: the lid has no clip-path, see the clip-path
+     gotcha in CLAUDE.md). */
   content: "";
   position: absolute;
-  left: 12%;
-  right: 12%;
+  left: 0%;
+  right: 0%;
   bottom: -2px;
   height: 3px;
   border-radius: 999px;
-  background: var(--primary);
-  box-shadow: 0 0 8px 1px var(--primary);
-  animation: hobby-pack-lid-pulse 1.8s ease-in-out infinite;
+  background:
+    linear-gradient(90deg, transparent, var(--primary) 50%, transparent) no-repeat,
+    color-mix(in oklab, var(--primary) 45%, transparent);
+  /* Spot is 50% of the line; with that size, background-position -100% /
+     200% puts it fully off the left / right end (percent positions scale
+     by the 50% of leftover width — recompute these if the size changes). */
+  background-size: 50% 100%, 100% 100%;
+  background-position: -100% 0, 0 0;
+  filter: drop-shadow(0 0 4px var(--primary));
+  animation: hobby-pack-lid-sweep 2s ease-in-out infinite;
 }
-@keyframes hobby-pack-lid-pulse {
-  0%,
-  100% {
-    opacity: 0.3;
+@keyframes hobby-pack-lid-sweep {
+  /* Sweep across in the first 70%, then rest off the right end briefly
+     before the next pass. */
+  0% {
+    background-position: -100% 0, 0 0;
   }
-  50% {
-    opacity: 1;
+  70%,
+  100% {
+    background-position: 200% 0, 0 0;
   }
 }
 

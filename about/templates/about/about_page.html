@@ -75,9 +75,14 @@
         {% endfor %}
     </div>
 
-    <button type="button" data-hobby-reset class="mx-auto mt-10 hidden rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary">
-        Rip another pack
-    </button>
+    <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
+        <button type="button" data-hobby-reset class="hidden rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary">
+            Rip another pack
+        </button>
+        <button type="button" data-hobby-show-all class="rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary">
+            Show all hobbies
+        </button>
+    </div>
 </section>
 {% endif %}
 {% endblock %}
@@ -92,6 +97,7 @@
         const lid = pack.querySelector("[data-hobby-pack-lid]");
         const table = document.querySelector("[data-hobby-table]");
         const resetButton = document.querySelector("[data-hobby-reset]");
+        const showAllButton = document.querySelector("[data-hobby-show-all]");
         const cards = Array.from(document.querySelectorAll("[data-hobby-card]"));
 
         const TEAR_COMPLETE_AT = 0.85;
@@ -102,6 +108,10 @@
         let dragging = false;
         let torn = false;
         let packRect = null;
+        // Deal/flip/tear timeouts still in flight, cancelled whenever the
+        // table is cleared so a quick button press can't be overwritten by
+        // a stale callback (e.g. "Show all" clicked mid-tear).
+        let pendingTimers = [];
 
         // The lid rests slightly ajar by default (see .hobby-pack-lid's resting
         // transform in styles.css); dragging slides it further off along the
@@ -127,12 +137,31 @@
             tilt.style.transform = "";
         };
 
-        const dealCards = () => {
+        const clearTable = () => {
+            pendingTimers.forEach((timer) => window.clearTimeout(timer));
+            pendingTimers = [];
             cards.forEach((card) => {
                 card.classList.add("hidden");
                 card.removeAttribute("data-dealt");
                 card.querySelector("[data-hobby-card-inner]").classList.remove("is-flipped");
             });
+            // Force a reflow so cards that were already on the table replay
+            // the deal-in animation when data-dealt is re-added below.
+            void table.offsetWidth;
+        };
+
+        // Swaps the pack out for the card table. `showAll` is whether the
+        // "Show all hobbies" button stays offered afterward.
+        const showTable = (showAll) => {
+            pack.classList.add("hidden");
+            table.classList.remove("hidden");
+            table.classList.add("flex");
+            resetButton.classList.remove("hidden");
+            showAllButton.classList.toggle("hidden", !showAll);
+        };
+
+        const dealCards = () => {
+            clearTable();
 
             // Weighted draw without replacement: each pick chooses from the
             // remaining cards in proportion to their rarity's weight, so
@@ -157,17 +186,33 @@
             });
         };
 
+        // The whole collection, rarest first, dealt face-down and then
+        // flipped face-up in a quick ripple so it's readable at a glance
+        // (each card still flips back on click like a normal draw).
+        const dealAllCards = () => {
+            clearTable();
+            const sorted = [...cards].sort((a, b) =>
+                (RARITY_WEIGHTS[a.dataset.rarity] ?? 0) - (RARITY_WEIGHTS[b.dataset.rarity] ?? 0)
+            );
+            sorted.forEach((card, index) => {
+                table.append(card);
+                card.classList.remove("hidden");
+                card.style.animationDelay = `${index * 60}ms`;
+                card.setAttribute("data-dealt", "");
+                pendingTimers.push(window.setTimeout(() => {
+                    card.querySelector("[data-hobby-card-inner]").classList.add("is-flipped");
+                }, 550 + index * 60));
+            });
+        };
+
         const completeTear = () => {
             lid.style.transform = "";
             lid.style.transition = "";
             pack.classList.add("is-torn");
-            window.setTimeout(() => {
-                pack.classList.add("hidden");
-                table.classList.remove("hidden");
-                table.classList.add("flex");
-                resetButton.classList.remove("hidden");
+            pendingTimers.push(window.setTimeout(() => {
+                showTable(true);
                 dealCards();
-            }, 520);
+            }, 520));
         };
 
         pack.addEventListener("pointerdown", (event) => {
@@ -225,15 +270,22 @@
 
         if (resetButton) {
             resetButton.addEventListener("click", () => {
+                clearTable();
                 table.classList.add("hidden");
                 table.classList.remove("flex");
                 resetButton.classList.add("hidden");
+                showAllButton.classList.remove("hidden");
                 pack.classList.remove("hidden", "is-torn");
                 lid.style.transform = "";
                 lid.style.transition = "";
                 resetIdleTilt();
             });
         }
+
+        showAllButton.addEventListener("click", () => {
+            showTable(false);
+            dealAllCards();
+        });
     })();
 </script>
 {% endblock %}
