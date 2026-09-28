@@ -124,6 +124,20 @@ Page tree is enforced via each model's `parent_page_types`/`subpage_types`:
   new delayed callback there too.
   Card backs are identical for every hobby (no hobby-specific markup) so
   the back never hints at what's inside — only the flipped front does.
+  The pack shows the glitch-slice wordmark (`static/img/logo-glitch.png`)
+  and card backs the "S" monogram (`static/img/logo-monogram.png`). Both
+  come from design-tool PNG exports with an opaque `#07060D` background
+  baked in; they were run through a "color to alpha" pass (glow → real
+  transparency, not a hard cutout) and cropped. Redo that for any
+  re-export, or it shows as a dark box on `bg-card`. The monogram export
+  also clips its frame glow at a hard square ~6px in from each edge; the
+  6–22px band (glow only, the stroke starts ~22px in) was feathered to 0
+  alpha in the PNG so it melts into the card back's cyan radial glow (see
+  `.hobby-card-back` in styles.css). The wordmark runs the long way down
+  the pack via `rotate-90` + `w-[260px] max-w-none` (sized by its
+  unrotated width, which becomes the pack length). Images inside the pack
+  need `draggable="false"` + `pointer-events-none` or native image-drag
+  hijacks the lid drag.
 
 `HomePage.get_context()` pulls featured projects by querying
 `projects.models.ProjectPage` directly (imported inside the method to avoid

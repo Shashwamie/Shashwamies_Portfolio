@@ -215,6 +215,25 @@ body {
   border-radius: var(--radius-lg);
   overflow: hidden;
 }
+.hobby-card-back {
+  /* Tinted toward the monogram's cyan frame (--accent) so the logo sits in
+     the card rather than on it: a soft cyan glow behind the logo that the
+     monogram's own (edge-feathered) glow fades into, over a faint
+     cyan-tinted hatch, over the card fill. */
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      color-mix(in oklab, var(--accent) 14%, transparent) 0,
+      color-mix(in oklab, var(--accent) 5%, transparent) 35%,
+      transparent 65%
+    ),
+    repeating-linear-gradient(
+      45deg,
+      color-mix(in oklab, var(--accent) 10%, transparent) 0 1px,
+      transparent 1px 12px
+    ),
+    var(--card);
+}
 .hobby-card-front {
   transform: rotateY(180deg);
 }
@@ -349,13 +368,16 @@ body {
    spectacle than the tear itself needed), before the pack is hidden and
    cards are dealt. */
 .hobby-pack-tilt {
+  /* Corner radius shared by the pack body and lid, so their outer corners
+     always match. Deliberately sharp for the angular cyberpunk look. */
+  --hobby-pack-radius: 6px;
   transform-style: preserve-3d;
   transition: transform 0.2s ease-out;
 }
 .hobby-pack-body {
   transition: opacity 0.4s ease 0.1s;
   border-top-color: transparent;
-  border-radius: 0 0 20px 20px;
+  border-radius: 0 0 var(--hobby-pack-radius) var(--hobby-pack-radius);
 }
 .hobby-pack-body::after {
   /* A restrained shine sweep, reusing the same diagonal-highlight technique
@@ -376,7 +398,7 @@ body {
   transition: transform 0.25s ease, opacity 0.25s ease;
   border: 2px solid var(--primary);
   border-bottom-color: transparent;
-  border-radius: 20px 20px 0 0;
+  border-radius: var(--hobby-pack-radius) var(--hobby-pack-radius) 0 0;
 }
 .hobby-pack-lid::after {
   /* A glow sweeping left → right along the lid's open (borderless) bottom
