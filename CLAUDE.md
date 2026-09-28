@@ -124,6 +124,24 @@ Page tree is enforced via each model's `parent_page_types`/`subpage_types`:
   new delayed callback there too.
   Card backs are identical for every hobby (no hobby-specific markup) so
   the back never hints at what's inside — only the flipped front does.
+  Card fronts are laid out like a real TCG card (224×336): an art panel
+  with the name near its top, "Hobby" chip + vertical illustrator credit
+  along its bottom; then a bordered textbox with the description and a
+  copyright line along its bottom. The hobby-icon "cost" box (top-left),
+  rarity tag (top-right) and rarity mark (bottom-right) are children of
+  `.hobby-card-front` itself, *not* the art panel/textbox — those clip
+  overflow, and these pieces deliberately straddle their corners/borders
+  (so the cost box and tag need solid backgrounds, the rarity mark gets a
+  solid `.hobby-card-rarity-backing` clipped to its chamfered frame shape so
+  borders don't show through its transparent interior, and the copyright
+  line needs `pr-9` + a no-wrap line short enough to clear the mark).
+  The rarity mark is `static/img/rarity-<rarity>.png`, picked by filename from
+  `hobby.rarity` — a new tier needs a matching PNG. Copyright
+  and "Illust. Placeholder" text are placeholder flavor. Art comes from the
+  optional `Hobby.image`; without one, a rarity-tinted placeholder shows a
+  large faded copy of the hobby icon. `--rarity-color` (common gray,
+  uncommon white, rare = `--primary`, legendary = `--accent`) matches the
+  rarity-mark logos.
   The pack shows the glitch-slice wordmark (`static/img/logo-glitch.png`)
   and card backs the "S" monogram (`static/img/logo-monogram.png`). Both
   come from design-tool PNG exports with an opaque `#07060D` background

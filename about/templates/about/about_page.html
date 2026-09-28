@@ -29,7 +29,7 @@
 </section>
 
 {% if hobbies %}
-<section class="mx-auto max-w-4xl px-6 pb-24 text-center">
+<section class="mx-auto max-w-5xl px-6 pb-24 text-center">
     <h2 class="font-display text-2xl font-bold tracking-tight sm:text-3xl">Hobbies</h2>
     <p class="mt-2 text-muted-foreground">Drag the top of the pack sideways to pop it open.</p>
 
@@ -49,21 +49,46 @@
     <div data-hobby-table class="relative mt-16 hidden flex-wrap items-stretch justify-center gap-6">
         <div class="pointer-events-none absolute inset-x-0 top-1/2 -z-10 mx-auto h-24 w-3/4 -translate-y-1/2 rounded-full bg-primary/10 blur-3xl"></div>
         {% for hobby in hobbies %}
-        <div class="hobby-card hidden h-72 w-48" data-hobby-card data-rarity="{{ hobby.rarity }}">
+        <div class="hobby-card hidden h-84 w-56" data-hobby-card data-rarity="{{ hobby.rarity }}">
             <div class="hobby-card-inner cursor-pointer" data-hobby-card-inner tabindex="0" role="button" aria-label="Flip {{ hobby.name }} card">
                 <div class="hobby-card-back flex items-center justify-center border border-accent/30">
                     <img src="{% static 'img/logo-monogram.png' %}" alt="" width="392" height="392" draggable="false" class="pointer-events-none relative h-24 w-24">
                 </div>
-                <div class="hobby-card-front flex flex-col items-center justify-between bg-card p-4">
-                    <div>
-                        <p class="font-mono text-[0.65rem] font-medium uppercase tracking-widest text-muted-foreground">{{ hobby.get_rarity_display }}</p>
-                        <h3 class="mt-1 font-display text-lg font-semibold text-foreground">{{ hobby.name }}</h3>
+                {# Card face laid out like a TCG card: art panel with the name near its top edge (tag chip + illustrator credit along its bottom), then a boxed textbox holding the description with a copyright line tucked along its bottom. The icon "cost" box, rarity tag, and rarity mark sit directly on the card face (not inside the art panel, which clips overflow) so they can straddle the art/textbox borders at the corners. Copyright text is placeholder flavor. #}
+                <div class="hobby-card-front flex flex-col bg-card p-2 text-left">
+                    <div class="hobby-card-art relative h-[208px] shrink-0 overflow-hidden rounded-sm">
+                        {% if hobby.image %}
+                            {% image hobby.image fill-440x416 class="absolute inset-0 h-full w-full object-cover" %}
+                        {% else %}
+                            <div class="hobby-card-art-placeholder absolute inset-0 flex items-center justify-center">
+                                <div class="hobby-icon h-24 w-24 opacity-25">
+                                    {% include "includes/hobby_icon.html" with icon=hobby.icon %}
+                                </div>
+                            </div>
+                        {% endif %}
+                        <div class="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/70 via-transparent to-black/50"></div>
+
+                        <h3 class="hobby-card-name absolute inset-x-10 top-3 text-center font-display text-base font-bold leading-tight text-foreground">{{ hobby.name }}</h3>
+
+                        <span class="hobby-card-chip absolute bottom-1.5 left-1.5 px-1.5 py-px font-mono text-[0.5rem] uppercase tracking-widest">Hobby</span>
+                        <span class="absolute bottom-1.5 right-1 font-mono text-[0.4rem] uppercase tracking-wider text-foreground/60 [writing-mode:vertical-rl]">Illust. Placeholder</span>
                     </div>
-                    {% if hobby.description %}
-                    <p class="text-sm text-muted-foreground">{{ hobby.description }}</p>
-                    {% endif %}
-                    <div class="hobby-icon h-10 w-10">
-                        {% include "includes/hobby_icon.html" with icon=hobby.icon %}
+
+                    <div class="hobby-card-textbox mt-1.5 flex min-h-0 flex-1 flex-col px-2 pt-1.5 pb-1">
+                        <p class="min-h-0 flex-1 overflow-hidden text-[0.7rem] leading-snug text-foreground/90">{{ hobby.description }}</p>
+                        {# pr-9 keeps this clear of the rarity mark overlapping the textbox's bottom-right corner. #}
+                        <p class="mt-1 whitespace-nowrap pr-9 font-mono text-[0.4rem] leading-tight tracking-wider text-muted-foreground/80">&trade; &amp; &copy; {% now "Y" %} Shashwamie</p>
+                    </div>
+
+                    <div class="hobby-card-cost absolute left-0.5 top-0.5 flex h-10 w-10 items-center justify-center">
+                        <div class="hobby-icon h-6 w-6">
+                            {% include "includes/hobby_icon.html" with icon=hobby.icon %}
+                        </div>
+                    </div>
+                    <span class="hobby-card-type absolute right-2 top-[3px] px-1.5 py-0.5 font-mono text-[0.5rem] font-medium uppercase tracking-[0.2em]">{{ hobby.get_rarity_display }}</span>
+                    <div class="pointer-events-none absolute bottom-0 right-0 h-11 w-11">
+                        <div class="hobby-card-rarity-backing absolute inset-0"></div>
+                        <img src="{% static 'img/rarity-'|add:hobby.rarity|add:'.png' %}" alt="{{ hobby.get_rarity_display }}" width="160" height="160" draggable="false" class="relative h-full w-full">
                     </div>
                 </div>
             </div>

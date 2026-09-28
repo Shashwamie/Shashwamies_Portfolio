@@ -133,12 +133,21 @@ class Hobby(models.Model):
     description = models.TextField(
         blank=True, help_text="Short blurb shown when the card is flipped."
     )
+    image = models.ForeignKey(
+        "wagtailimages.Image",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Card art. Leave empty to use a placeholder built from the icon.",
+    )
 
     panels = [
         FieldPanel("name"),
         FieldPanel("icon"),
         FieldPanel("rarity"),
         FieldPanel("description"),
+        FieldPanel("image"),
     ]
 
     class Meta:

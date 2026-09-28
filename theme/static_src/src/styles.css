@@ -268,22 +268,82 @@ body {
   animation: hobby-card-deal 0.5s ease-out both;
 }
 
+/* Rarity colors match the rarity-mark logos (static/img/rarity-*.png):
+   rare = site primary yellow, legendary = site accent cyan. */
 .hobby-card[data-rarity="common"] {
-  --rarity-color: #6b6b6b;
+  --rarity-color: #8b909a;
 }
 .hobby-card[data-rarity="uncommon"] {
-  --rarity-color: #c7cdd6;
+  --rarity-color: #e6e9ef;
 }
 .hobby-card[data-rarity="rare"] {
-  --rarity-color: #e8b93c;
+  --rarity-color: var(--primary);
 }
 .hobby-card[data-rarity="legendary"] {
-  --rarity-color: #2f7de1;
+  --rarity-color: var(--accent);
 }
 
 .hobby-card-front {
   border: 2px solid var(--rarity-color);
   box-shadow: 0 0 18px -6px var(--rarity-color);
+}
+/* TCG-style card face pieces (see the layout comment in about_page.html). */
+.hobby-card-art {
+  border: 1px solid color-mix(in oklab, var(--rarity-color) 45%, transparent);
+}
+.hobby-card-art-placeholder {
+  /* Stand-in art until a Hobby gets a real image: rarity-tinted glow over
+     a faint hatch, behind a large faded copy of the hobby icon. */
+  background:
+    radial-gradient(
+      circle at 50% 60%,
+      color-mix(in oklab, var(--rarity-color) 22%, transparent) 0,
+      transparent 70%
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      color-mix(in oklab, var(--rarity-color) 8%, transparent) 0 1px,
+      transparent 1px 10px
+    ),
+    var(--background);
+}
+.hobby-card-cost {
+  border: 2px solid var(--rarity-color);
+  border-radius: 3px;
+  /* Solid, since it straddles the art panel's corner border. */
+  background: var(--background);
+  box-shadow: 0 0 10px -3px var(--rarity-color);
+}
+.hobby-card-type {
+  color: var(--rarity-color);
+  border: 1px solid color-mix(in oklab, var(--rarity-color) 60%, transparent);
+  border-radius: 999px;
+  /* Solid, since it straddles the art panel's top border. */
+  background: var(--background);
+}
+.hobby-card-name {
+  text-shadow: 0 1px 3px rgb(0 0 0 / 0.9), 0 0 12px rgb(0 0 0 / 0.6);
+}
+.hobby-card-chip {
+  color: var(--foreground);
+  border: 1px solid color-mix(in oklab, var(--rarity-color) 50%, transparent);
+  border-radius: 2px;
+  background: rgb(0 0 0 / 0.7);
+}
+.hobby-card-textbox {
+  border: 1px solid color-mix(in oklab, var(--rarity-color) 30%, transparent);
+  border-radius: 2px;
+  background: rgb(0 0 0 / 0.35);
+}
+.hobby-card-rarity-backing {
+  /* Solid fill behind the rarity mark (which is mostly transparent inside
+     its frame) so the textbox/card borders it overlaps don't show through.
+     Clipped to the mark's frame silhouette — square with chamfered
+     top-left/bottom-right corners, measured from rarity-*.png (frame edge
+     at ~5%/94%, chamfers ~23% in) — and inset a hair so the frame stroke
+     covers the backing's edge instead of a square box showing. */
+  background: var(--background);
+  clip-path: polygon(6% 24%, 24% 6%, 94% 6%, 94% 76%, 76% 94%, 6% 94%);
 }
 .hobby-card-front .hobby-icon {
   color: var(--rarity-color);
