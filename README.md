@@ -72,14 +72,23 @@ Hobbies and timeline entries are Wagtail **Snippets**, not pages — edit
 them from `/cms/` → **Snippets**, not the page tree.
 
 - **Hobbies** show up on the About page as a "booster pack": visitors drag
-  the top of the pack off to open it and get 3 cards, flipped by clicking.
-  Each hobby has a name, a short description (shown on the flipped card),
-  an icon, and a rarity (common / uncommon / rare / legendary). Rarity sets
-  the card's color and how often it's drawn — the draw weights are
-  `RARITY_WEIGHTS` in `about/templates/about/about_page.html`
-  (currently 50 / 30 / 15 / 5). Picking from the existing icons needs no
-  code; a brand-new icon needs a choice added to `Hobby.ICON_CHOICES` and a
-  matching SVG in `templates/includes/hobby_icon.html`.
+  the top of the pack off to open it and get 3 cards, flipped by clicking,
+  or hit **Show all hobbies** to see the whole collection face-up. Each
+  hobby is a trading-card-style card with:
+  - **Name** — shown along the bottom of the card art on one line (long
+    names automatically shrink to fit).
+  - **Description** — the card's text box.
+  - **Icon** — shown in the card's top-left corner. Picking from the
+    existing icons needs no code; a brand-new icon needs a choice added to
+    `Hobby.ICON_CHOICES` and a matching SVG in
+    `templates/includes/hobby_icon.html`.
+  - **Rarity** (common / uncommon / rare / legendary) — sets the card's
+    border color, its rarity logo in the bottom-right corner
+    (`static/img/rarity-*.png`), and how often it's drawn. The draw weights
+    are `RARITY_WEIGHTS` in `about/templates/about/about_page.html`
+    (currently 50 / 30 / 15 / 5).
+  - **Image** (optional) — the card art, cropped to fit. Without one, the
+    card shows a placeholder built from its icon.
 - **Timeline events** show up on `/about/timeline/`, newest first.
 
 ## Project structure
@@ -100,6 +109,7 @@ about/              AboutPage (+ hobby booster pack), TimelinePage, and the
 contact/            ContactPage (Wagtail form builder) + templates
 templates/          base.html + includes/ (button, badge, timeline_event,
                     hobby_icon partials)
+static/img/         logos: pack wordmark, card-back monogram, rarity marks
 ```
 
 ## Design system

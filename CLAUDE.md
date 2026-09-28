@@ -125,8 +125,13 @@ Page tree is enforced via each model's `parent_page_types`/`subpage_types`:
   Card backs are identical for every hobby (no hobby-specific markup) so
   the back never hints at what's inside — only the flipped front does.
   Card fronts are laid out like a real TCG card (224×336): an art panel
-  with the name near its top, "Hobby" chip + vertical illustrator credit
-  along its bottom; then a bordered textbox with the description and a
+  with the name beside the "Hobby" chip along its bottom edge (in
+  `font-card` = Chakra Petch, loaded in base.html just for card names; the
+  art's gradient overlay is darkest at the bottom for its legibility; always
+  one line — `fitCardName()` in about_page.html's script steps the font down
+  at deal time until it fits, min 9px, since hidden cards can't be
+  measured) and a
+  vertical illustrator credit; then a bordered textbox with the description and a
   copyright line along its bottom. The hobby-icon "cost" box (top-left),
   rarity tag (top-right) and rarity mark (bottom-right) are children of
   `.hobby-card-front` itself, *not* the art panel/textbox — those clip

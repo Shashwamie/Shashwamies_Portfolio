@@ -54,7 +54,7 @@
                 <div class="hobby-card-back flex items-center justify-center border border-accent/30">
                     <img src="{% static 'img/logo-monogram.png' %}" alt="" width="392" height="392" draggable="false" class="pointer-events-none relative h-24 w-24">
                 </div>
-                {# Card face laid out like a TCG card: art panel with the name near its top edge (tag chip + illustrator credit along its bottom), then a boxed textbox holding the description with a copyright line tucked along its bottom. The icon "cost" box, rarity tag, and rarity mark sit directly on the card face (not inside the art panel, which clips overflow) so they can straddle the art/textbox borders at the corners. Copyright text is placeholder flavor. #}
+                {# Card face laid out like a TCG card: art panel with the name + tag chip along its bottom edge (and a vertical illustrator credit), then a boxed textbox holding the description with a copyright line tucked along its bottom. The icon "cost" box, rarity tag, and rarity mark sit directly on the card face (not inside the art panel, which clips overflow) so they can straddle the art/textbox borders at the corners. Copyright text is placeholder flavor. #}
                 <div class="hobby-card-front flex flex-col bg-card p-2 text-left">
                     <div class="hobby-card-art relative h-[208px] shrink-0 overflow-hidden rounded-sm">
                         {% if hobby.image %}
@@ -66,11 +66,13 @@
                                 </div>
                             </div>
                         {% endif %}
-                        <div class="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/70 via-transparent to-black/50"></div>
+                        <div class="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80"></div>
 
-                        <h3 class="hobby-card-name absolute inset-x-10 top-3 text-center font-display text-base font-bold leading-tight text-foreground">{{ hobby.name }}</h3>
-
-                        <span class="hobby-card-chip absolute bottom-1.5 left-1.5 px-1.5 py-px font-mono text-[0.5rem] uppercase tracking-widest">Hobby</span>
+                        {# Name sits along the art's bottom edge beside the "Hobby" chip (right-4 clears the vertical illustrator credit). Always one line: fitCardName() in the script below shrinks the font until a long name fits. #}
+                        <div class="absolute bottom-1.5 left-1.5 right-4 flex items-end gap-1.5">
+                            <span class="hobby-card-chip shrink-0 px-1.5 py-px font-mono text-[0.5rem] uppercase tracking-widest">Hobby</span>
+                            <h3 class="hobby-card-name min-w-0 flex-1 overflow-hidden whitespace-nowrap font-card text-[0.95rem] font-bold uppercase leading-[1.05] tracking-wide text-foreground">{{ hobby.name }}</h3>
+                        </div>
                         <span class="absolute bottom-1.5 right-1 font-mono text-[0.4rem] uppercase tracking-wider text-foreground/60 [writing-mode:vertical-rl]">Illust. Placeholder</span>
                     </div>
 
@@ -158,6 +160,26 @@
             tilt.style.transform = "";
         };
 
+        // Keeps each card name on one line: starting from the CSS size, step
+        // the font down until the name fits the space beside the "Hobby"
+        // chip. Only measurable once the card is displayed (not `hidden`),
+        // and only accurate once the card font has loaded, hence running it
+        // at deal time behind document.fonts.ready. Card sizes are fixed, so
+        // there's nothing to redo on resize.
+        const MIN_NAME_PX = 9;
+        const fitCardName = (card) => {
+            const name = card.querySelector(".hobby-card-name");
+            name.style.fontSize = "";
+            let size = parseFloat(getComputedStyle(name).fontSize);
+            while (name.scrollWidth > name.clientWidth && size > MIN_NAME_PX) {
+                size -= 0.5;
+                name.style.fontSize = `${size}px`;
+            }
+        };
+        const fitCardNames = (dealt) => {
+            document.fonts.ready.then(() => dealt.forEach(fitCardName));
+        };
+
         const clearTable = () => {
             pendingTimers.forEach((timer) => window.clearTimeout(timer));
             pendingTimers = [];
@@ -205,6 +227,7 @@
                 card.style.animationDelay = `${index * 120}ms`;
                 card.setAttribute("data-dealt", "");
             });
+            fitCardNames(drawn);
         };
 
         // The whole collection, rarest first, dealt face-down and then
@@ -224,6 +247,7 @@
                     card.querySelector("[data-hobby-card-inner]").classList.add("is-flipped");
                 }, 550 + index * 60));
             });
+            fitCardNames(sorted);
         };
 
         const completeTear = () => {

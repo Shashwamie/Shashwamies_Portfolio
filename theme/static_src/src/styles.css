@@ -38,6 +38,8 @@
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  /* Hobby card names only — chamfered letterforms echo the logos. */
+  --font-card: "Chakra Petch", "Space Grotesk", ui-sans-serif, sans-serif;
 }
 
 /*
