@@ -1,0 +1,70 @@
+{% comment %}
+Usage: {% include "includes/hobby_icon.html" with icon=hobby.icon %}
+Renders one custom line-art SVG per Hobby.icon key. currentColor stroke so
+callers control tint (e.g. rarity color) via the surrounding element's
+`color`.
+{% endcomment %}
+{% if icon == "gaming" %}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 8.5h12a4 4 0 0 1 4 4.5l-.6 3.4a2.2 2.2 0 0 1-3.9 1.1L16 15.5H8l-1.5 2a2.2 2.2 0 0 1-3.9-1.1L2 13a4 4 0 0 1 4-4.5Z"/>
+    <path d="M7 11v3M5.5 12.5h3"/>
+    <circle cx="15.5" cy="11.5" r=".75" fill="currentColor" stroke="none"/>
+    <circle cx="17.5" cy="13.5" r=".75" fill="currentColor" stroke="none"/>
+</svg>
+{% elif icon == "tcg" %}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="5" y="3" width="14" height="18" rx="2"/>
+    <path d="M12 8.5 13 11h2.5l-2 1.6.8 2.4-2.3-1.5-2.3 1.5.8-2.4-2-1.6H11l1-2.5Z"/>
+    <path d="M8 18h8"/>
+</svg>
+{% elif icon == "skiing" %}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 6 7 20M6 6h2M5 19h3"/>
+    <path d="M17 4 20 18M16 4h2M16.5 17h3"/>
+    <circle cx="12" cy="6" r="1.4" fill="currentColor" stroke="none"/>
+    <path d="M12 9v5l3 3M12 14l-3 3"/>
+</svg>
+{% elif icon == "mountain_biking" %}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="6" cy="17" r="3.2"/>
+    <circle cx="18" cy="17" r="3.2"/>
+    <path d="M6 17 10 9h4l4 8M10 9 8.5 6h3M13 12h4"/>
+    <path d="M3.5 12.5 6.5 6l3.5 2"/>
+</svg>
+{% elif icon == "legos" %}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4" y="10" width="16" height="9" rx="1.2"/>
+    <circle cx="8.5" cy="6.5" r="1.6"/>
+    <circle cx="15.5" cy="6.5" r="1.6"/>
+    <path d="M8.5 8v2.5M15.5 8v2.5"/>
+</svg>
+{% elif icon == "rock_climbing" %}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 3.5a2.6 2.6 0 0 0 0 5.2h1.5v2.4H8a2.6 2.6 0 0 0 0 5.2h2"/>
+    <path d="M6.5 3.5h3M6.5 8.7h4.5M6.5 16.3h4"/>
+    <path d="M15 5 19 9M19 5 15 9"/>
+    <path d="M14 20l3-5 3 5"/>
+</svg>
+{% elif icon == "game_dev" %}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 8 4 12l4 4M16 8l4 4-4 4"/>
+    <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/>
+</svg>
+{% elif icon == "reading" %}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 6c-1.6-1.2-3.6-1.7-6-1.5v13c2.4-.2 4.4.3 6 1.5 1.6-1.2 3.6-1.7 6-1.5v-13c-2.4-.2-4.4.3-6 1.5Z"/>
+    <path d="M12 6v13"/>
+</svg>
+{% elif icon == "camping" %}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 19 11 5l2 4M20 19 13 5"/>
+    <path d="M8.3 12.5h7M4 19h16"/>
+</svg>
+{% elif icon == "motorcycles" %}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="5.5" cy="17" r="2.6"/>
+    <circle cx="18.5" cy="17" r="2.6"/>
+    <path d="M5.5 17 9 11h4l1.5 2H18.5M9 11l-1-3H5.5M13 13l2 4"/>
+    <path d="M11.5 8h2"/>
+</svg>
+{% endif %}

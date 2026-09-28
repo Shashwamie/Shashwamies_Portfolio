@@ -2,33 +2,238 @@
 {% load wagtailcore_tags wagtailimages_tags %}
 
 {% block content %}
-<section class="mx-auto max-w-3xl px-6 py-16 sm:py-24">
+<section class="mx-auto max-w-3xl px-6 py-16 text-center sm:py-24">
     <h1 class="font-display text-3xl font-bold tracking-tight sm:text-4xl">{{ page.title }}</h1>
 
-    <div class="mt-10 flex flex-col gap-10 sm:flex-row sm:items-start">
-        {% if page.photo %}
-        {% image page.photo fill-320x320 class="h-40 w-40 shrink-0 rounded-lg border border-border object-cover" %}
-        {% endif %}
+    {% if page.photo %}
+    {% image page.photo fill-320x320 class="mx-auto mt-10 h-40 w-40 rounded-full border-2 border-primary/60 object-cover glow-primary-subtle" %}
+    {% endif %}
 
-        <div class="flex-1">
-            {% if page.bio %}
-            <div class="richtext text-foreground">{{ page.bio|richtext }}</div>
-            {% endif %}
+    {% if page.bio %}
+    <div class="richtext mx-auto mt-6 max-w-xl text-left text-foreground">{{ page.bio|richtext }}</div>
+    {% endif %}
 
-            {% if page.skills %}
-            <div class="mt-8 flex flex-wrap gap-2">
-                {% for block in page.skills %}
-                    {% include "includes/badge.html" with text=block.value %}
-                {% endfor %}
+    {% if page.skills %}
+    <div class="mt-8 flex flex-wrap justify-center gap-2">
+        {% for block in page.skills %}
+            {% include "includes/badge.html" with text=block.value %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if page.resume_document %}
+    <div class="mt-8">
+        {% include "includes/button.html" with href=page.resume_document.url text="Download resume" variant="primary" %}
+    </div>
+    {% endif %}
+</section>
+
+{% if hobbies %}
+<section class="mx-auto max-w-4xl px-6 pb-24 text-center">
+    <h2 class="font-display text-2xl font-bold tracking-tight sm:text-3xl">Hobbies</h2>
+    <p class="mt-2 text-muted-foreground">Drag the top of the pack sideways to pop it open.</p>
+
+    <div class="hobby-pack relative mx-auto mt-20 h-72 w-48 cursor-grab touch-none select-none transition-transform duration-200 hover:-translate-y-1 active:cursor-grabbing" data-hobby-pack style="perspective: 900px;">
+        <div class="pointer-events-none absolute inset-x-6 -bottom-4 h-6 rounded-full bg-black/60 blur-lg"></div>
+
+        <div data-hobby-pack-tilt class="hobby-pack-tilt relative h-full w-full">
+            <div data-hobby-pack-body class="hobby-pack-body absolute inset-0 flex flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl border-2 border-primary bg-card pt-10">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="h-12 w-12 text-primary">
+                    <rect x="4" y="8" width="13" height="13" rx="1.5" transform="rotate(-8 10.5 14.5)"/>
+                    <rect x="7" y="4" width="13" height="13" rx="1.5"/>
+                </svg>
+                <span class="font-display text-base font-bold uppercase tracking-[0.3em] text-primary glow-primary-subtle">Hobbies</span>
             </div>
-            {% endif %}
 
-            {% if page.resume_document %}
-            <div class="mt-8">
-                {% include "includes/button.html" with href=page.resume_document.url text="Download resume" variant="primary" %}
-            </div>
-            {% endif %}
+            <div data-hobby-pack-lid class="hobby-pack-lid absolute inset-x-0 top-[-42px] h-12 rounded-2xl border-2 border-primary bg-card"></div>
         </div>
     </div>
+
+    <div data-hobby-table class="relative mt-16 hidden flex-wrap items-stretch justify-center gap-6">
+        <div class="pointer-events-none absolute inset-x-0 top-1/2 -z-10 mx-auto h-24 w-3/4 -translate-y-1/2 rounded-full bg-primary/10 blur-3xl"></div>
+        {% for hobby in hobbies %}
+        <div class="hobby-card hidden h-72 w-48" data-hobby-card data-rarity="{{ hobby.rarity }}">
+            <div class="hobby-card-inner cursor-pointer" data-hobby-card-inner tabindex="0" role="button" aria-label="Flip {{ hobby.name }} card">
+                <div class="hobby-card-back flex items-center justify-center border border-primary/30 bg-card">
+                    <div class="pointer-events-none absolute inset-0 opacity-40" style="background-image: repeating-linear-gradient(45deg, var(--border) 0, var(--border) 1px, transparent 1px, transparent 12px);"></div>
+                    <div class="relative flex h-14 w-14 items-center justify-center rounded-full border-2 border-primary/60 font-display text-lg font-bold text-primary glow-primary-subtle">S.</div>
+                </div>
+                <div class="hobby-card-front flex flex-col items-center justify-between bg-card p-4">
+                    <div>
+                        <p class="font-mono text-[0.65rem] font-medium uppercase tracking-widest text-muted-foreground">{{ hobby.get_rarity_display }}</p>
+                        <h3 class="mt-1 font-display text-lg font-semibold text-foreground">{{ hobby.name }}</h3>
+                    </div>
+                    {% if hobby.description %}
+                    <p class="text-sm text-muted-foreground">{{ hobby.description }}</p>
+                    {% endif %}
+                    <div class="hobby-icon h-10 w-10">
+                        {% include "includes/hobby_icon.html" with icon=hobby.icon %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <button type="button" data-hobby-reset class="mx-auto mt-10 hidden rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary">
+        Rip another pack
+    </button>
 </section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (function () {
+        const pack = document.querySelector("[data-hobby-pack]");
+        if (!pack) return;
+
+        const tilt = pack.querySelector("[data-hobby-pack-tilt]");
+        const lid = pack.querySelector("[data-hobby-pack-lid]");
+        const table = document.querySelector("[data-hobby-table]");
+        const resetButton = document.querySelector("[data-hobby-reset]");
+        const cards = Array.from(document.querySelectorAll("[data-hobby-card]"));
+
+        const TEAR_COMPLETE_AT = 0.85;
+        const MAX_TILT_DEG = 12;
+        // Relative draw weights per Hobby.rarity (see dealCards).
+        const RARITY_WEIGHTS = { common: 50, uncommon: 30, rare: 15, legendary: 5 };
+
+        let dragging = false;
+        let torn = false;
+        let packRect = null;
+
+        // The lid rests slightly ajar by default (see .hobby-pack-lid's resting
+        // transform in styles.css); dragging slides it further off along the
+        // same path, so it reads as "already loose, now coming free" rather
+        // than being peeled or torn.
+        const setLidProgress = (progress) => {
+            lid.style.transform = `translate(${progress * 130}px, ${-5 - progress * 90}px) rotate(${3 + progress * 45}deg)`;
+        };
+
+        // Idle-only 3D parallax: tilts the whole pack toward the mouse
+        // while it's just being hovered, not dragged (see pointermove
+        // below, which only calls this when `dragging` is false — during
+        // an active drag the tilt is frozen at neutral so it doesn't fight
+        // visually with the lid coming loose).
+        const applyIdleTilt = (event) => {
+            const rect = pack.getBoundingClientRect();
+            const relX = (event.clientX - rect.left) / rect.width - 0.5;
+            const relY = (event.clientY - rect.top) / rect.height - 0.5;
+            tilt.style.transform = `rotateX(${-relY * MAX_TILT_DEG}deg) rotateY(${relX * MAX_TILT_DEG}deg)`;
+        };
+
+        const resetIdleTilt = () => {
+            tilt.style.transform = "";
+        };
+
+        const dealCards = () => {
+            cards.forEach((card) => {
+                card.classList.add("hidden");
+                card.removeAttribute("data-dealt");
+                card.querySelector("[data-hobby-card-inner]").classList.remove("is-flipped");
+            });
+
+            // Weighted draw without replacement: each pick chooses from the
+            // remaining cards in proportion to their rarity's weight, so
+            // rarer cards show up less often but a pack never repeats a card.
+            const pool = [...cards];
+            const drawn = [];
+            while (drawn.length < 3 && pool.length) {
+                const weights = pool.map((card) => RARITY_WEIGHTS[card.dataset.rarity] ?? RARITY_WEIGHTS.common);
+                let roll = Math.random() * weights.reduce((sum, weight) => sum + weight, 0);
+                let pick = 0;
+                while (roll >= weights[pick] && pick < pool.length - 1) {
+                    roll -= weights[pick];
+                    pick++;
+                }
+                drawn.push(pool.splice(pick, 1)[0]);
+            }
+
+            drawn.forEach((card, index) => {
+                card.classList.remove("hidden");
+                card.style.animationDelay = `${index * 120}ms`;
+                card.setAttribute("data-dealt", "");
+            });
+        };
+
+        const completeTear = () => {
+            lid.style.transform = "";
+            lid.style.transition = "";
+            pack.classList.add("is-torn");
+            window.setTimeout(() => {
+                pack.classList.add("hidden");
+                table.classList.remove("hidden");
+                table.classList.add("flex");
+                resetButton.classList.remove("hidden");
+                dealCards();
+            }, 520);
+        };
+
+        pack.addEventListener("pointerdown", (event) => {
+            dragging = true;
+            torn = false;
+            lid.style.transition = "none";
+            resetIdleTilt();
+            packRect = pack.getBoundingClientRect();
+            pack.setPointerCapture(event.pointerId);
+            setLidProgress(Math.max(0, (event.clientX - packRect.left) / packRect.width));
+        });
+        pack.addEventListener("pointermove", (event) => {
+            if (dragging) {
+                if (torn) return;
+                const progress = Math.max(0, Math.min(1, (event.clientX - packRect.left) / packRect.width));
+                setLidProgress(progress);
+                if (progress >= TEAR_COMPLETE_AT) {
+                    torn = true;
+                    dragging = false;
+                    completeTear();
+                }
+            } else {
+                applyIdleTilt(event);
+            }
+        });
+        pack.addEventListener("pointerleave", () => {
+            if (!dragging) resetIdleTilt();
+        });
+        const endDrag = () => {
+            if (!dragging) return;
+            dragging = false;
+            if (!torn) {
+                // Clear the inline drag transform/transition so the lid's
+                // default CSS (resting "ajar" transform + transition) takes
+                // back over and animates smoothly to rest.
+                lid.style.transform = "";
+                lid.style.transition = "";
+            }
+        };
+        pack.addEventListener("pointerup", endDrag);
+        pack.addEventListener("pointercancel", endDrag);
+
+        cards.forEach((card) => {
+            const inner = card.querySelector("[data-hobby-card-inner]");
+            inner.addEventListener("click", () => {
+                inner.classList.toggle("is-flipped");
+            });
+            inner.addEventListener("keydown", (event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    inner.classList.toggle("is-flipped");
+                }
+            });
+        });
+
+        if (resetButton) {
+            resetButton.addEventListener("click", () => {
+                table.classList.add("hidden");
+                table.classList.remove("flex");
+                resetButton.classList.add("hidden");
+                pack.classList.remove("hidden", "is-torn");
+                lid.style.transform = "";
+                lid.style.transition = "";
+                resetIdleTilt();
+            });
+        }
+    })();
+</script>
 {% endblock %}

@@ -189,3 +189,217 @@ body {
 .form-styled input[type="radio"] {
   accent-color: var(--primary);
 }
+
+/* Hobby card pack (About page). Cards are flip cards (3D transform,
+   preserve-3d + backface-visibility) dealt onto a "table" after the pack is
+   dragged open; rarity tint is set per-card via the --rarity-color custom
+   property below and consumed by the border/glow/icon color. */
+.hobby-card {
+  perspective: 1200px;
+}
+.hobby-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+.hobby-card-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+.hobby-card-front,
+.hobby-card-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.hobby-card-front {
+  transform: rotateY(180deg);
+}
+
+@keyframes hobby-card-wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg) translateY(0);
+  }
+  25% {
+    transform: rotate(-3deg) translateY(-4px);
+  }
+  75% {
+    transform: rotate(3deg) translateY(-4px);
+  }
+}
+.hobby-card:hover .hobby-card-inner:not(.is-flipped) {
+  animation: hobby-card-wiggle 0.5s ease-in-out;
+}
+
+@keyframes hobby-card-deal {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.hobby-card[data-dealt] {
+  animation: hobby-card-deal 0.5s ease-out both;
+}
+
+.hobby-card[data-rarity="common"] {
+  --rarity-color: #6b6b6b;
+}
+.hobby-card[data-rarity="uncommon"] {
+  --rarity-color: #c7cdd6;
+}
+.hobby-card[data-rarity="rare"] {
+  --rarity-color: #e8b93c;
+}
+.hobby-card[data-rarity="legendary"] {
+  --rarity-color: #2f7de1;
+}
+
+.hobby-card-front {
+  border: 2px solid var(--rarity-color);
+  box-shadow: 0 0 18px -6px var(--rarity-color);
+}
+.hobby-card-front .hobby-icon {
+  color: var(--rarity-color);
+}
+
+.hobby-card[data-rarity="legendary"] .hobby-card-front::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 60%
+  );
+  background-size: 250% 250%;
+  animation: hobby-card-shimmer 2.5s linear infinite;
+  pointer-events: none;
+}
+@keyframes hobby-card-shimmer {
+  0% {
+    background-position: 200% 200%;
+  }
+  100% {
+    background-position: -50% -50%;
+  }
+}
+
+/* Booster pack (closed state) — deliberately flat/bold, matching the rest
+   of the site's neon-outline design language rather than attempting
+   photorealistic foil/3D (CSS divs can't get there; an earlier attempt at
+   gradients + shimmer + a mouse-driven tilt, all together, just looked
+   like flat shapes pretending to be 3D, which read worse than embracing
+   flat). The `hobby-pack-tilt` wrapper below is a narrower, later re-add
+   of just the mouse-follow parallax on its own (no gradients/shimmer) —
+   JS sets its `rotateX`/`rotateY` directly based on pointer position
+   while idle (not dragging, see `applyIdleTilt` in about_page.html), reset
+   to neutral via `resetIdleTilt` on pointerleave/pointerdown/reset so it
+   doesn't fight visually with the lid's own transform while a drag is in
+   progress. A static, always-fully-visible `hobby-pack-body` sits under a
+   separate `hobby-pack-lid` piece — same shape/material as the body
+   (solid `bg-card` + bold primary border, rounded-2xl), not a
+   differently-colored strip. The lid rests slightly "ajar" by default
+   (offset + rotated a
+   couple degrees, see its base `transform` below) so it visibly reads as a
+   loose cap sitting on top rather than sealed to the body — no zigzag/tear
+   line needed; an earlier version tried a spiky clip-path crimp there and
+   it looked like a sticker pasted onto a flat rectangle, so this dropped
+   the zigzag entirely in favor of "already a bit detached, drag it the
+   rest of the way off". Dragging tracks the pointer's absolute x position
+   over the pack and slides+rotates the lid further along that same path
+   (JS sets its `transform` directly, with `transition: none` for 1:1
+   tracking while actively dragging). Releasing before the threshold clears
+   the inline override so the CSS transition below eases it back to the
+   resting "ajar" position; crossing ~85% of the pack's width instead adds
+   `is-torn`, which flings the lid the rest of the way off (see its
+   transform below) followed shortly by the body simply fading out (a
+   plain opacity transition, no scale/burst/glow/particles — a "explosion"
+   version with a radial glow flash and a scattered-particle fizzle was
+   tried and didn't land: the glow read as a jarring flat wash of color,
+   and even once its particles were tuned down, the whole thing was more
+   spectacle than the tear itself needed), before the pack is hidden and
+   cards are dealt. */
+.hobby-pack-tilt {
+  transform-style: preserve-3d;
+  transition: transform 0.2s ease-out;
+}
+.hobby-pack-body {
+  transition: opacity 0.4s ease 0.1s;
+  border-top-color: transparent;
+  border-radius: 0 0 20px 20px;
+}
+.hobby-pack-body::after {
+  /* A restrained shine sweep, reusing the same diagonal-highlight technique
+     already used for legendary-rarity cards (see .hobby-card-shimmer)
+     rather than the heavier gradient-wash treatment that was tried and
+     dropped for the pack earlier — this is just a slow, subtle light pass,
+     not a foil material. */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.28) 50%,
+    transparent 60%
+  );
+  background-size: 250% 250%;
+  animation: hobby-card-shimmer 6s linear infinite;
+  pointer-events: none;
+}
+.hobby-pack.is-torn .hobby-pack-body {
+  opacity: 0;
+}
+.hobby-pack-lid {
+  position: relative;
+  transform: translateY(-5px) rotate(3deg);
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  border: 2px solid var(--primary);
+  border-bottom-color: transparent;
+  border-radius: 20px 20px 0 0;
+}
+.hobby-pack-lid::after {
+  /* A soft pulsing glow tracing the lid's open (borderless) bottom edge —
+     the edge that no longer has a solid border since it's meant to read as
+     already separated from the body — to hint that it's the part you pull. */
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -2px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--primary);
+  box-shadow: 0 0 8px 1px var(--primary);
+  animation: hobby-pack-lid-pulse 1.8s ease-in-out infinite;
+}
+@keyframes hobby-pack-lid-pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+
+.hobby-pack.is-torn .hobby-pack-lid {
+  /* Continues the same up-and-right, clockwise arc (left edge up, right
+     edge down) the drag was already animating (see setLidProgress) rather
+     than reversing it — an earlier version flipped rotation direction
+     here, which snapped visibly mid-flight instead of reading as one
+     continuous motion. */
+  transform: translate(240px, -210px) rotate(85deg);
+  opacity: 0;
+  transition: transform 0.35s ease-in, opacity 0.35s ease-in;
+}

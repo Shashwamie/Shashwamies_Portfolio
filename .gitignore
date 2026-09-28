@@ -9,6 +9,9 @@ wheels/
 # Virtual environments
 .venv
 
+# iCloud-excluded real dirs behind the .venv / node_modules symlinks
+*.nosync
+
 # Django
 db.sqlite3
 media/

@@ -43,6 +43,11 @@ class AboutPage(Page):
     subpage_types = ["about.TimelinePage"]
     max_count = 1
 
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+        context["hobbies"] = Hobby.objects.all()
+        return context
+
 
 class TimelineEvent(models.Model):
     EVENT_TYPE_CHOICES = [
@@ -100,6 +105,57 @@ class TimelineEvent(models.Model):
         if start == end:
             return start
         return f"{start} – {end}"
+
+
+class Hobby(models.Model):
+    ICON_CHOICES = [
+        ("gaming", "Gaming"),
+        ("tcg", "TCG"),
+        ("skiing", "Skiing"),
+        ("mountain_biking", "Mountain Biking"),
+        ("legos", "Legos"),
+        ("rock_climbing", "Rock Climbing"),
+        ("game_dev", "Game Development"),
+        ("reading", "Reading"),
+        ("camping", "Camping"),
+        ("motorcycles", "Motorcycles"),
+    ]
+    RARITY_CHOICES = [
+        ("common", "Common"),
+        ("uncommon", "Uncommon"),
+        ("rare", "Rare"),
+        ("legendary", "Legendary"),
+    ]
+
+    name = models.CharField(max_length=100)
+    icon = models.CharField(max_length=30, choices=ICON_CHOICES)
+    rarity = models.CharField(max_length=20, choices=RARITY_CHOICES, default="common")
+    description = models.TextField(
+        blank=True, help_text="Short blurb shown when the card is flipped."
+    )
+
+    panels = [
+        FieldPanel("name"),
+        FieldPanel("icon"),
+        FieldPanel("rarity"),
+        FieldPanel("description"),
+    ]
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+class HobbyViewSet(SnippetViewSet):
+    model = Hobby
+    icon = "pick"
+    list_display = ["name", "rarity", "icon"]
+    list_filter = ["rarity"]
+
+
+register_snippet(HobbyViewSet)
 
 
 class TimelineEventViewSet(SnippetViewSet):
