@@ -6,6 +6,7 @@ https://docs.djangoproject.com/en/6.1/topics/settings/
 """
 
 import os
+import shutil
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -163,6 +164,8 @@ MAILERS = {
 # https://django-tailwind.readthedocs.io/
 
 TAILWIND_APP_NAME = "theme"
+# On Windows npm is npm.cmd, which subprocess won't find from a bare "npm".
+NPM_BIN_PATH = shutil.which("npm") or "npm"
 INTERNAL_IPS = ["127.0.0.1"]
 
 
