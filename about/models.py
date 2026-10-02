@@ -20,9 +20,31 @@ class AboutPage(Page):
     )
     bio = RichTextField(blank=True)
     skills = StreamField(
-        [("skill", blocks.CharBlock(icon="tag"))],
+        [
+            (
+                "skill",
+                blocks.StructBlock(
+                    [
+                        ("name", blocks.CharBlock()),
+                        (
+                            "description",
+                            blocks.TextBlock(
+                                required=False,
+                                help_text="Shown in the panel that opens when the skill is clicked.",
+                            ),
+                        ),
+                    ],
+                    icon="tag",
+                ),
+            )
+        ],
         blank=True,
-        help_text="One block per skill/technology, shown as badges.",
+        help_text="One block per skill. Each opens a description panel when clicked.",
+    )
+    languages = StreamField(
+        [("language", blocks.CharBlock(icon="tag"))],
+        blank=True,
+        help_text="One block per language, shown as badges.",
     )
     resume_document = models.ForeignKey(
         "wagtaildocs.Document",
@@ -36,6 +58,7 @@ class AboutPage(Page):
         FieldPanel("photo"),
         FieldPanel("bio"),
         FieldPanel("skills"),
+        FieldPanel("languages"),
         FieldPanel("resume_document"),
     ]
 

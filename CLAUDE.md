@@ -89,6 +89,14 @@ Page tree is enforced via each model's `parent_page_types`/`subpage_types`:
   `max_count=1`. `ContactPage` is Wagtail's form-builder pattern
   (`AbstractEmailForm` + `AbstractFormField`/`ContactFormField`) — form
   fields (name/email/message) are admin-editable, not hardcoded.
+  `AboutPage` has two StreamFields: `languages` (plain `CharBlock`s,
+  rendered as badges, shown first) and `skills` (`StructBlock` of
+  `name` + optional `description`, rendered as numbered HUD tiles; a tile
+  with a description is a `data-skill-trigger` button that opens its
+  `data-skill-panel` below the grid, one at a time). `skills` used to be
+  plain `CharBlock`s — migration `about.0007` converts the stored JSON on
+  the page *and* its revisions, which is the pattern to follow for any
+  future StreamField block-shape change.
 - `about.TimelinePage` (child of `AboutPage`, `max_count=1`,
   `/about/timeline/`) — a vertical branching timeline of school/work history.
   Its entries (`about.TimelineEvent`) are **Wagtail Snippets**, not child

@@ -13,17 +13,55 @@
     <div class="richtext mx-auto mt-6 max-w-xl text-left text-foreground">{{ page.bio|richtext }}</div>
     {% endif %}
 
+    {% if page.languages %}
+    <div class="mt-10">
+        <h2 class="font-display text-xl font-bold tracking-tight">Languages</h2>
+        <div class="mt-4 flex flex-wrap justify-center gap-2">
+            {% for block in page.languages %}
+                {% include "includes/badge.html" with text=block.value %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
     {% if page.skills %}
-    <div class="mt-8 flex flex-wrap justify-center gap-2">
+    <div class="mt-10" data-skills>
+        <h2 class="font-display text-xl font-bold tracking-tight">Skills</h2>
+        {# HUD-style readout tiles (numbered, chamfered, primary edge) so skills read differently from the Languages badges above. A skill with a description is a button that opens its panel below the grid (one open at a time, see the skills script below); one without stays a plain tile. #}
+        <ul class="mt-4 grid grid-cols-2 gap-3 text-left sm:grid-cols-3">
+            {% for block in page.skills %}
+            <li>
+                {% if block.value.description %}
+                <button type="button" data-skill-trigger aria-expanded="false" aria-controls="skill-panel-{{ forloop.counter }}" class="clip-corner flex w-full cursor-pointer items-center gap-3 border border-border border-l-2 border-l-primary bg-card px-4 py-3 text-left transition-colors hover:border-primary/50 hover:bg-primary/5 aria-expanded:border-primary aria-expanded:bg-primary/10">
+                {% else %}
+                <div class="clip-corner flex items-center gap-3 border border-border border-l-2 border-l-primary bg-card px-4 py-3">
+                {% endif %}
+                    <span class="font-mono text-xs text-primary">{{ forloop.counter|stringformat:"02d" }}</span>
+                    <span class="min-w-0 flex-1 text-sm font-medium text-foreground">{{ block.value.name }}</span>
+                {% if block.value.description %}
+                    <span class="font-mono text-xs text-muted-foreground" aria-hidden="true">+</span>
+                </button>
+                {% else %}
+                </div>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+
         {% for block in page.skills %}
-            {% include "includes/badge.html" with text=block.value %}
+        {% if block.value.description %}
+        <div id="skill-panel-{{ forloop.counter }}" data-skill-panel hidden class="clip-corner mt-3 border border-primary/40 bg-card px-5 py-4 text-left">
+            <p class="font-mono text-xs uppercase tracking-widest text-primary">{{ forloop.counter|stringformat:"02d" }} // {{ block.value.name }}</p>
+            <p class="mt-2 whitespace-pre-line text-sm leading-relaxed text-foreground/90">{{ block.value.description }}</p>
+        </div>
+        {% endif %}
         {% endfor %}
     </div>
     {% endif %}
 
     {% if page.resume_document %}
     <div class="mt-8">
-        {% include "includes/button.html" with href=page.resume_document.url text="Download resume" variant="primary" %}
+        {% include "includes/button.html" with href=page.resume_document.url text="View resume" variant="primary" target="_blank" %}
     </div>
     {% endif %}
 </section>
@@ -111,6 +149,26 @@
 {% endblock %}
 
 {% block extra_js %}
+<script>
+    // Skills: clicking a tile opens its description panel below the grid,
+    // closing whichever was open; clicking the open tile again closes it.
+    (function () {
+        const triggers = Array.from(document.querySelectorAll("[data-skill-trigger]"));
+        triggers.forEach((trigger) => {
+            trigger.addEventListener("click", () => {
+                const opening = trigger.getAttribute("aria-expanded") !== "true";
+                triggers.forEach((other) => {
+                    other.setAttribute("aria-expanded", "false");
+                    document.getElementById(other.getAttribute("aria-controls")).hidden = true;
+                });
+                if (opening) {
+                    trigger.setAttribute("aria-expanded", "true");
+                    document.getElementById(trigger.getAttribute("aria-controls")).hidden = false;
+                }
+            });
+        });
+    })();
+</script>
 <script>
     (function () {
         const pack = document.querySelector("[data-hobby-pack]");
