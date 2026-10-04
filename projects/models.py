@@ -22,6 +22,10 @@ class ProjectIndexPage(Page):
     max_count = 1
 
     def get_context(self, request, *args, **kwargs):
+        # Imported here to match HomePage's pattern of avoiding cross-app
+        # imports at module load.
+        from about.models import AboutPage
+
         context = super().get_context(request, *args, **kwargs)
         projects = ProjectPage.objects.child_of(self).live()
 
@@ -29,8 +33,26 @@ class ProjectIndexPage(Page):
         if tag:
             projects = projects.filter(tech_stack__name__iexact=tag)
 
+        # Filter buttons come from the About page's Languages list, so adding
+        # a language there adds a button here. Matching a project relies on
+        # it having a tech_stack tag with the same name (case-insensitive).
+        about_page = AboutPage.objects.live().first()
+        languages = []
+        if about_page:
+            languages = [
+                block.value.strip()
+                for block in about_page.languages
+                if block.value.strip()
+            ]
+        active_language = next(
+            (lang for lang in languages if tag and lang.lower() == tag.lower()),
+            None,
+        )
+
         context["projects"] = projects
         context["tag"] = tag
+        context["languages"] = languages
+        context["active_language"] = active_language
         return context
 
 

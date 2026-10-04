@@ -8,7 +8,26 @@
     <div class="mt-4 max-w-2xl text-muted-foreground">{{ page.intro|richtext }}</div>
     {% endif %}
 
-    {% if tag %}
+    {% if languages %}
+    {# Language filter, sourced from the About page's Languages list. Plain links reusing the ?tag= filter, so no JS. #}
+    <nav aria-label="Filter projects by language" class="mt-8 flex flex-wrap gap-2">
+        <a href="{{ page.url }}"
+           {% if not tag %}aria-current="true"{% endif %}
+           class="rounded-md border px-4 py-1.5 text-sm font-medium transition-colors {% if not tag %}border-primary bg-primary text-primary-foreground{% else %}border-border bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground{% endif %}">
+            All
+        </a>
+        {% for language in languages %}
+        <a href="{{ page.url }}?tag={{ language|urlencode }}"
+           {% if language == active_language %}aria-current="true"{% endif %}
+           class="rounded-md border px-4 py-1.5 text-sm font-medium transition-colors {% if language == active_language %}border-primary bg-primary text-primary-foreground{% else %}border-border bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground{% endif %}">
+            {{ language }}
+        </a>
+        {% endfor %}
+    </nav>
+    {% endif %}
+
+    {# Tags that aren't languages (e.g. clicked from a project page's tech badges) have no button above, so show what's being filtered. #}
+    {% if tag and not active_language %}
     <div class="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
         Filtering by {% include "includes/badge.html" with text=tag %}
         <a href="{{ page.url }}" class="text-primary hover:underline">Clear</a>
@@ -36,6 +55,8 @@
         </a>
         {% endfor %}
     </div>
+    {% elif tag %}
+    <p class="mt-10 text-muted-foreground">No projects tagged {{ active_language|default:tag }} yet.</p>
     {% else %}
     <p class="mt-10 text-muted-foreground">No projects to show yet — add some in the Wagtail admin.</p>
     {% endif %}

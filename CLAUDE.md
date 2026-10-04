@@ -79,7 +79,12 @@ Page tree is enforced via each model's `parent_page_types`/`subpage_types`:
   here too, or Wagtail's admin won't offer it as a child of Home.
 - `projects.ProjectIndexPage` (child of Home, `max_count=1`) → lists its
   child `ProjectPage`s; supports `?tag=<name>` filtering via
-  `get_context()`.
+  `get_context()`. The filter buttons at the top are the About page's
+  `languages` list (not the set of tags in use) — each is just a
+  `?tag=<language>` link, so a project only shows under a language if it
+  has a `tech_stack` tag with the same name (case-insensitive). Tags that
+  aren't languages (linked from a project page's tech badges) still filter,
+  with a "Filtering by … / Clear" line instead of an active button.
 - `projects.ProjectPage` — the main content-editing surface. Notable fields:
   `tech_stack` is a `ClusterTaggableManager` (django-taggit via
   modelcluster), rendered as badges and used for the tag filter; `body` is a
