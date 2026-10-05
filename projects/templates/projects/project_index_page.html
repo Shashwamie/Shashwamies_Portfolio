@@ -8,16 +8,32 @@
     <div class="mt-4 max-w-2xl text-muted-foreground">{{ page.intro|richtext }}</div>
     {% endif %}
 
+    {# Status filter (the nav's Projects dropdown links straight to these). Keeps any ?tag= so the two filters combine. #}
+    <nav aria-label="Filter projects by status" class="mt-8 inline-flex rounded-md border border-border bg-card p-1">
+        <a href="{{ page.url }}{% if tag %}?tag={{ tag|urlencode }}{% endif %}"
+           {% if not status %}aria-current="true"{% endif %}
+           class="rounded px-4 py-1.5 text-sm font-medium transition-colors {% if not status %}bg-primary text-primary-foreground{% else %}text-muted-foreground hover:text-foreground{% endif %}">
+            All projects
+        </a>
+        {% for value, label in status_filters %}
+        <a href="{{ page.url }}?status={{ value }}{% if tag %}&amp;tag={{ tag|urlencode }}{% endif %}"
+           {% if value == status %}aria-current="true"{% endif %}
+           class="rounded px-4 py-1.5 text-sm font-medium transition-colors {% if value == status %}bg-primary text-primary-foreground{% else %}text-muted-foreground hover:text-foreground{% endif %}">
+            {{ label }}
+        </a>
+        {% endfor %}
+    </nav>
+
     {% if languages %}
     {# Language filter, sourced from the About page's Languages list. Plain links reusing the ?tag= filter, so no JS. #}
-    <nav aria-label="Filter projects by language" class="mt-8 flex flex-wrap gap-2">
-        <a href="{{ page.url }}"
+    <nav aria-label="Filter projects by language" class="mt-4 flex flex-wrap gap-2">
+        <a href="{{ page.url }}{% if status %}?status={{ status }}{% endif %}"
            {% if not tag %}aria-current="true"{% endif %}
            class="rounded-md border px-4 py-1.5 text-sm font-medium transition-colors {% if not tag %}border-primary bg-primary text-primary-foreground{% else %}border-border bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground{% endif %}">
             All
         </a>
         {% for language in languages %}
-        <a href="{{ page.url }}?tag={{ language|urlencode }}"
+        <a href="{{ page.url }}?{% if status %}status={{ status }}&amp;{% endif %}tag={{ language|urlencode }}"
            {% if language == active_language %}aria-current="true"{% endif %}
            class="rounded-md border px-4 py-1.5 text-sm font-medium transition-colors {% if language == active_language %}border-primary bg-primary text-primary-foreground{% else %}border-border bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground{% endif %}">
             {{ language }}
@@ -30,7 +46,7 @@
     {% if tag and not active_language %}
     <div class="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
         Filtering by {% include "includes/badge.html" with text=tag %}
-        <a href="{{ page.url }}" class="text-primary hover:underline">Clear</a>
+        <a href="{{ page.url }}{% if status %}?status={{ status }}{% endif %}" class="text-primary hover:underline">Clear</a>
     </div>
     {% endif %}
 
@@ -55,8 +71,8 @@
         </a>
         {% endfor %}
     </div>
-    {% elif tag %}
-    <p class="mt-10 text-muted-foreground">No projects tagged {{ active_language|default:tag }} yet.</p>
+    {% elif tag or status %}
+    <p class="mt-10 text-muted-foreground">No{% if status %} {{ status_label|lower }}{% endif %} projects{% if tag %} tagged {{ active_language|default:tag }}{% endif %} yet.</p>
     {% else %}
     <p class="mt-10 text-muted-foreground">No projects to show yet — add some in the Wagtail admin.</p>
     {% endif %}

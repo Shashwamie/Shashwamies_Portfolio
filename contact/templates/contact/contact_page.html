@@ -8,6 +8,32 @@
     <div class="richtext mt-4 text-muted-foreground">{{ page.intro|richtext }}</div>
     {% endif %}
 
+    {% if page.contact_email or page.linkedin_url %}
+    {# Direct contact links, above the form. Same chamfered tile look as the About page's skills. #}
+    <div class="mt-10 grid gap-3 sm:grid-cols-2">
+        {% if page.contact_email %}
+        <a href="mailto:{{ page.contact_email }}" class="group clip-corner flex items-center gap-4 border border-border border-l-2 border-l-primary bg-card px-4 py-3 transition-colors hover:border-primary/50 hover:bg-primary/5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+            <span class="min-w-0">
+                <span class="block font-mono text-xs uppercase tracking-widest text-muted-foreground">Email</span>
+                <span class="block truncate text-sm font-medium text-foreground group-hover:text-primary">{{ page.contact_email }}</span>
+            </span>
+        </a>
+        {% endif %}
+        {% if page.linkedin_url %}
+        <a href="{{ page.linkedin_url }}" target="_blank" rel="noopener noreferrer" class="group clip-corner flex items-center gap-4 border border-border border-l-2 border-l-primary bg-card px-4 py-3 transition-colors hover:border-primary/50 hover:bg-primary/5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+            <span class="min-w-0">
+                <span class="block font-mono text-xs uppercase tracking-widest text-muted-foreground">LinkedIn</span>
+                <span class="block truncate text-sm font-medium text-foreground group-hover:text-primary">{{ page.linkedin_display }}</span>
+            </span>
+        </a>
+        {% endif %}
+    </div>
+
+    <p class="mt-10 font-mono text-xs uppercase tracking-widest text-muted-foreground">Or send a message</p>
+    {% endif %}
+
     <form action="{% pageurl page %}" method="POST" class="form-styled mt-10 space-y-6">
         {% csrf_token %}
         {{ form.non_field_errors }}

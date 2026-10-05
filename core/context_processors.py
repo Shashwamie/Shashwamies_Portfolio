@@ -23,4 +23,11 @@ def nav_pages(request):
             about_page.get_children().live().filter(slug="timeline").first()
         )
 
+    # Projects' dropdown links to its index page filtered by status
+    # (?status=in-development / ?status=completed, see
+    # ProjectIndexPage.STATUS_FILTERS).
+    from projects.models import ProjectIndexPage
+
+    context["projects_index"] = ProjectIndexPage.objects.child_of(home).live().first()
+
     return context

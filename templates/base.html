@@ -29,6 +29,10 @@
                     Home
                 </a>
                 {% for nav_page in nav_pages %}
+                {# Contact is a single page with nothing under it, so it's a plain link rather than a dropdown. #}
+                {% if nav_page.slug == "contact" %}
+                <a href="{% pageurl nav_page %}" class="text-sm font-medium text-foreground transition-colors hover:text-primary">{{ nav_page.title }}</a>
+                {% else %}
                 <div class="relative" data-dropdown>
                     <button type="button" data-dropdown-trigger aria-expanded="false"
                             class="flex items-center gap-1 text-sm font-medium text-foreground transition-colors hover:text-primary">
@@ -37,14 +41,21 @@
                     </button>
                     <div data-dropdown-panel
                          class="invisible absolute {% if forloop.last %}right-0{% else %}left-0{% endif %} top-full mt-2 min-w-40 rounded-md border border-primary/35 bg-background/70 py-2 opacity-0 shadow-lg backdrop-blur-sm transition-opacity">
-                        <a href="{% pageurl nav_page %}" class="block px-4 py-2 text-sm text-foreground hover:bg-muted hover:text-primary">Overview</a>
+                        {# Projects has no Overview link: its status links cover it, and the page itself has an "All projects" toggle. #}
+                        {% if not projects_index or nav_page.pk != projects_index.pk %}
+                        <a href="{% pageurl nav_page %}" class="block px-4 py-2 text-sm text-foreground hover:bg-muted hover:text-primary">{% if nav_page.slug == "about" %}Bio{% else %}Overview{% endif %}</a>
+                        {% endif %}
                         {% if nav_page.slug == "about" and timeline_page %}
                         <a href="{% pageurl timeline_page %}" class="block px-4 py-2 text-sm text-foreground hover:bg-muted hover:text-primary">Timeline</a>
+                        {% elif projects_index and nav_page.pk == projects_index.pk %}
+                        <a href="{% pageurl projects_index %}?status=in-development" class="block px-4 py-2 text-sm text-foreground hover:bg-muted hover:text-primary">In development</a>
+                        <a href="{% pageurl projects_index %}?status=completed" class="block px-4 py-2 text-sm text-foreground hover:bg-muted hover:text-primary">Completed</a>
                         {% else %}
                         <a href="#" class="block px-4 py-2 text-sm text-foreground hover:bg-muted hover:text-primary">Coming soon</a>
                         {% endif %}
                     </div>
                 </div>
+                {% endif %}
                 {% endfor %}
             </nav>
 
@@ -59,20 +70,30 @@
                 Home
             </a>
             {% for nav_page in nav_pages %}
+            {% if nav_page.slug == "contact" %}
+            <a href="{% pageurl nav_page %}" class="rounded-md px-2 py-2 text-sm font-medium text-foreground hover:bg-muted hover:text-primary">{{ nav_page.title }}</a>
+            {% else %}
             <details class="group">
                 <summary class="flex cursor-pointer list-none items-center justify-between rounded-md px-2 py-2 text-sm font-medium text-foreground hover:bg-muted hover:text-primary">
                     {{ nav_page.title }}
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                 </summary>
                 <div class="ml-2 flex flex-col gap-1 border-l border-border pl-3">
-                    <a href="{% pageurl nav_page %}" class="rounded-md px-2 py-2 text-sm text-muted-foreground hover:text-primary">Overview</a>
+                    {# Projects has no Overview link: its status links cover it, and the page itself has an "All projects" toggle. #}
+                    {% if not projects_index or nav_page.pk != projects_index.pk %}
+                    <a href="{% pageurl nav_page %}" class="rounded-md px-2 py-2 text-sm text-muted-foreground hover:text-primary">{% if nav_page.slug == "about" %}Bio{% else %}Overview{% endif %}</a>
+                    {% endif %}
                     {% if nav_page.slug == "about" and timeline_page %}
                     <a href="{% pageurl timeline_page %}" class="rounded-md px-2 py-2 text-sm text-muted-foreground hover:text-primary">Timeline</a>
+                    {% elif projects_index and nav_page.pk == projects_index.pk %}
+                    <a href="{% pageurl projects_index %}?status=in-development" class="rounded-md px-2 py-2 text-sm text-muted-foreground hover:text-primary">In development</a>
+                    <a href="{% pageurl projects_index %}?status=completed" class="rounded-md px-2 py-2 text-sm text-muted-foreground hover:text-primary">Completed</a>
                     {% else %}
                     <a href="#" class="rounded-md px-2 py-2 text-sm text-muted-foreground hover:text-primary">Coming soon</a>
                     {% endif %}
                 </div>
             </details>
+            {% endif %}
             {% endfor %}
         </nav>
     </header>

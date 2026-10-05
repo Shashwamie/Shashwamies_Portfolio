@@ -11,6 +11,13 @@ from wagtail.models import Page
 
 
 class ProjectIndexPage(Page):
+    # ?status= values -> label. A blank end_date means still in development
+    # (see ProjectPage.in_development).
+    STATUS_FILTERS = {
+        "in-development": "In development",
+        "completed": "Completed",
+    }
+
     intro = RichTextField(blank=True)
 
     content_panels = Page.content_panels + [
@@ -33,6 +40,12 @@ class ProjectIndexPage(Page):
         if tag:
             projects = projects.filter(tech_stack__name__iexact=tag)
 
+        status = request.GET.get("status")
+        if status not in self.STATUS_FILTERS:
+            status = None
+        if status:
+            projects = projects.filter(end_date__isnull=(status == "in-development"))
+
         # Filter buttons come from the About page's Languages list, so adding
         # a language there adds a button here. Matching a project relies on
         # it having a tech_stack tag with the same name (case-insensitive).
@@ -53,6 +66,9 @@ class ProjectIndexPage(Page):
         context["tag"] = tag
         context["languages"] = languages
         context["active_language"] = active_language
+        context["status"] = status
+        context["status_label"] = self.STATUS_FILTERS.get(status)
+        context["status_filters"] = self.STATUS_FILTERS.items()
         return context
 
 
@@ -98,7 +114,11 @@ class ProjectPage(Page):
     github_url = models.URLField(blank=True)
     live_url = models.URLField(blank=True)
     start_date = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Leave blank if the project is still in development (shown as \"Present\"). Set it once the project is finished or no longer being worked on.",
+    )
     featured = models.BooleanField(
         default=False,
         help_text="Show this project in the Featured Projects section on the homepage.",
@@ -124,6 +144,10 @@ class ProjectPage(Page):
 
     parent_page_types = ["projects.ProjectIndexPage"]
     subpage_types = []
+
+    @property
+    def in_development(self):
+        return self.end_date is None
 
     @property
     def tech_stack_list(self):

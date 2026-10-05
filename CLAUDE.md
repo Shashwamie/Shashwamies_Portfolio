@@ -90,10 +90,18 @@ Page tree is enforced via each model's `parent_page_types`/`subpage_types`:
   modelcluster), rendered as badges and used for the tag filter; `body` is a
   `StreamField` with `paragraph`/`image`/`code` block types; `featured`
   (bool) controls whether it shows in Home's "Featured projects" section.
+  A blank `end_date` means the project is still in development
+  (`ProjectPage.in_development`; the project page shows "– Present") —
+  there's no separate status field. `ProjectIndexPage` filters on it via
+  `?status=in-development` / `?status=completed` (`STATUS_FILTERS`; combines
+  with `?tag=`), shown as an All / In development / Completed toggle above
+  the language buttons.
 - `about.AboutPage`, `contact.ContactPage` — both children of Home,
   `max_count=1`. `ContactPage` is Wagtail's form-builder pattern
   (`AbstractEmailForm` + `AbstractFormField`/`ContactFormField`) — form
-  fields (name/email/message) are admin-editable, not hardcoded.
+  fields (name/email/message) are admin-editable, not hardcoded. Its
+  optional `contact_email`/`linkedin_url` render as direct-contact tiles
+  above the form (the section is hidden when both are blank).
   `AboutPage` has two StreamFields: `languages` (plain `CharBlock`s,
   rendered as badges, shown first) and `skills` (`StructBlock` of
   `name` + optional `description`, rendered as numbered HUD tiles; a tile
@@ -206,8 +214,11 @@ those nav items is a click-to-open dropdown (vanilla JS in `base.html`,
 hooks — no framework); dropdown *contents* are currently hardcoded
 placeholder links per item, **except** About's, which links to the real
 Timeline page via a dedicated `timeline_page` context var (also from
-`nav_pages()`) rather than a generic "list all children" mechanism — Projects'
-children are individual `ProjectPage`s that must not flood its dropdown.
+`nav_pages()`) rather than a generic "list all children" mechanism, and
+Projects', which links to its index page's `?status=in-development` /
+`?status=completed` filters (via a `projects_index` context var) and has no
+"Overview" link. About's "Overview" link is labelled "Bio". Contact
+(`slug == "contact"`) skips the dropdown entirely and is a plain link.
 Mobile reuses native `<details>`/`<summary>` accordions instead of the JS
 dropdown (no hover on touch).
 
