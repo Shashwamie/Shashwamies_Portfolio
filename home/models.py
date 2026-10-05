@@ -1,7 +1,26 @@
 from django.db import models
+from wagtail import blocks
 from wagtail.admin.panels import FieldPanel
-from wagtail.fields import RichTextField
+from wagtail.fields import RichTextField, StreamField
 from wagtail.models import Page
+
+
+class FlipCardBlock(blocks.StructBlock):
+    title = blocks.CharBlock(help_text="Shown on the front of the card.")
+    teaser = blocks.CharBlock(
+        required=False, help_text="Optional short line under the title on the front."
+    )
+    body = blocks.TextBlock(help_text="Shown on the back once the card is flipped.")
+    link_page = blocks.PageChooserBlock(
+        required=False, help_text="Optional page linked from the back of the card."
+    )
+    link_text = blocks.CharBlock(
+        required=False, help_text='Label for that link, e.g. "See all projects".'
+    )
+
+    class Meta:
+        icon = "doc-full"
+        label = "Flip card"
 
 
 class HomePage(Page):
@@ -17,6 +36,11 @@ class HomePage(Page):
         max_length=255, blank=True, help_text="Short role/title line under the heading."
     )
     intro = RichTextField(blank=True, help_text="A few sentences introducing yourself.")
+    flip_cards = StreamField(
+        [("card", FlipCardBlock())],
+        blank=True,
+        help_text="Cards between the hero and Featured projects that visitors click to flip over.",
+    )
     resume_document = models.ForeignKey(
         "wagtaildocs.Document",
         null=True,
@@ -31,6 +55,7 @@ class HomePage(Page):
         FieldPanel("aka_name"),
         FieldPanel("subheading"),
         FieldPanel("intro"),
+        FieldPanel("flip_cards"),
         FieldPanel("resume_document"),
     ]
 

@@ -183,6 +183,14 @@ Page tree is enforced via each model's `parent_page_types`/`subpage_types`:
   need `draggable="false"` + `pointer-events-none` or native image-drag
   hijacks the lid drag.
 
+`HomePage.flip_cards` is a StreamField of `FlipCardBlock`s
+(front title/teaser, back body, optional page link) rendered between the hero
+and Featured projects as click-to-flip cards (`.flip-card*` in styles.css;
+both faces share one grid cell so the card sizes to its taller face). The
+front is a button; a click anywhere on the back except its link flips it
+back (the back's own flip button is `sr-only` until focused, for keyboard
+users), and the face turned away is made `inert`.
+
 `HomePage.get_context()` pulls featured projects by querying
 `projects.models.ProjectPage` directly (imported inside the method to avoid
 a circular import with `projects.models`, which doesn't import `home`).
@@ -227,6 +235,13 @@ hook. Pages normally leave it empty (falls back to the default dot-grid
 `body` background from `styles.css`); `project_page.html` fills it with an
 inline `style="background-image: ..."` when `page.background_image` is set.
 This is the pattern to reuse for any future per-page background override.
+The dot grid also has a mouse spotlight + slight parallax (`.dot-spotlight`
+in styles.css, a fixed overlay rendered by base.html's `{% block
+dot_spotlight %}`, driven by a script at the bottom of base.html). A page
+that overrides `body_style` should also empty `dot_spotlight` (as
+`project_page.html` does), or bright dots float over its custom background.
+The hero heading's `.glitch` class (styles.css) is reusable: it needs a
+`data-text` attribute holding the same text as the element.
 
 ### Design system / Tailwind
 

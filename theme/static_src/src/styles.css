@@ -72,7 +72,7 @@
   --destructive-foreground: oklch(0.98 0.01 25);
 
   --border: oklch(0.27 0.03 290);
-  --input: oklch(0.27 0.03 290);
+  --input: oklch(20.151% 0.00595 285.806);
   --ring: oklch(0.87 0.19 96);
 }
 
@@ -93,6 +93,38 @@ body {
     100% 100%,
     28px 28px;
   background-repeat: no-repeat, repeat;
+  /* --dot-x/--dot-y: the mouse-driven parallax nudge (see .dot-spotlight). */
+  background-position:
+    0 0,
+    var(--dot-x, 0px) var(--dot-y, 0px);
+}
+
+/* Mouse spotlight over the dot grid: a viewport-fixed copy of the grid with
+   brighter dots, masked to a soft circle around the cursor. Driven by the
+   script at the bottom of base.html, which sets --spot-x/--spot-y (cursor,
+   viewport px), --dot-x/--dot-y (a few px of parallax that also nudges the
+   body grid above) and --scroll-y. Being position: fixed, its tiles have to
+   be shifted up by the scroll offset to stay lined up with the body's grid,
+   which scrolls with the page. z-index -1 keeps it under all content
+   (cards etc. with their own backgrounds cover it). The script sets
+   opacity, including fading it toward the bottom of the page to match the
+   body's dot fade. Mouse only; on touch it never appears. */
+.dot-spotlight {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  background-image: radial-gradient(
+    circle,
+    color-mix(in oklch, var(--primary) 85%, transparent) 1.5px,
+    transparent 1.5px
+  );
+  background-size: 28px 28px;
+  background-position: var(--dot-x, 0px) calc(var(--dot-y, 0px) - var(--scroll-y, 0px));
+  -webkit-mask-image: radial-gradient(circle 140px at var(--spot-x, -999px) var(--spot-y, -999px), black, transparent);
+  mask-image: radial-gradient(circle 140px at var(--spot-x, -999px) var(--spot-y, -999px), black, transparent);
 }
 
 /* Subtle neon glow for elements that do NOT also use .clip-corner (e.g. the
@@ -130,6 +162,120 @@ body {
     0 100%
   );
   border-radius: 0;
+}
+
+/* Glitch effect for the home hero heading. Two copies of the text
+   (::before cyan accent, ::after magenta, both from the element's data-text)
+   flash in horizontally offset slices while the heading itself skews. It's a
+   short burst at the end of each cycle (the last ~10%), not a constant
+   jitter, so the name stays readable. steps(1) makes every keyframe a hard
+   cut rather than a tween, which is what sells it as a glitch.
+   The copies fill the element (inset: 0) so they wrap identically to the
+   real text at any width. `content: ... / ""` gives them empty alt text so
+   screen readers don't announce the heading three times; browsers without
+   that syntax fall back to the first declaration. */
+.glitch {
+  position: relative;
+  animation: glitch-skew 6s steps(1) infinite;
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  content: attr(data-text) / "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.glitch::before {
+  color: var(--accent);
+  animation: glitch-slice-a 6s steps(1) infinite;
+}
+
+.glitch::after {
+  color: oklch(0.68 0.27 350);
+  animation: glitch-slice-b 6s steps(1) infinite;
+}
+
+@keyframes glitch-skew {
+  0%, 89% { transform: none; }
+  90% { transform: skewX(-8deg); }
+  92% { transform: skewX(5deg) translateX(-2px); }
+  94% { transform: translateX(3px); }
+  96% { transform: skewX(-3deg); }
+  98%, 100% { transform: none; }
+}
+
+@keyframes glitch-slice-a {
+  0%, 89% { opacity: 0; transform: none; clip-path: inset(0); }
+  90% { opacity: 0.9; transform: translateX(-5px); clip-path: inset(8% 0 70% 0); }
+  92% { transform: translateX(4px); clip-path: inset(55% 0 25% 0); }
+  94% { transform: translateX(-3px); clip-path: inset(30% 0 52% 0); }
+  96% { transform: translateX(6px); clip-path: inset(78% 0 4% 0); }
+  98% { transform: translateX(-2px); clip-path: inset(0 0 86% 0); }
+  100% { opacity: 0; }
+}
+
+@keyframes glitch-slice-b {
+  0%, 89% { opacity: 0; transform: none; clip-path: inset(0); }
+  90% { opacity: 0.9; transform: translateX(5px); clip-path: inset(62% 0 12% 0); }
+  92% { transform: translateX(-4px); clip-path: inset(15% 0 65% 0); }
+  94% { transform: translateX(3px); clip-path: inset(44% 0 38% 0); }
+  96% { transform: translateX(-6px); clip-path: inset(5% 0 80% 0); }
+  98% { transform: translateX(2px); clip-path: inset(85% 0 0 0); }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glitch,
+  .glitch::before,
+  .glitch::after {
+    animation: none;
+  }
+}
+
+/* Home page flip cards. Both faces sit in the same grid cell, so the card is
+   as tall as its taller face (no fixed height to overflow); the back starts
+   rotated 180deg and backface-visibility hides whichever side faces away.
+   The hidden face is also made `inert` by the script in home_page.html so
+   it can't be tabbed to. */
+.flip-card {
+  perspective: 1200px;
+}
+
+.flip-card-inner {
+  display: grid;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+
+.flip-card.is-flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-face {
+  grid-area: 1 / 1;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
+/* On hover the card turns partly see-through (the dot grid shows through
+   a little), same color, no tint. */
+.flip-card-front:hover {
+  background-color: color-mix(in oklch, var(--card) 70%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flip-card-inner {
+    transition: none;
+  }
 }
 
 /* Minimal styling for Wagtail RichTextField output (plain p/h2/h3/ul/a tags). */

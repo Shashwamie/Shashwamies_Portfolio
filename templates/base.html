@@ -17,6 +17,8 @@
     {% block extra_head %}{% endblock %}
 </head>
 <body class="min-h-screen bg-background text-foreground font-sans antialiased" {% block body_style %}{% endblock %}>
+    {# Mouse spotlight over the dot-grid background (see .dot-spotlight in styles.css). Pages that replace the background (body_style) should empty this block too. #}
+    {% block dot_spotlight %}<div class="dot-spotlight" data-dot-spotlight aria-hidden="true"></div>{% endblock %}
     <header class="sticky top-0 z-50 border-b border-border bg-background/50 backdrop-blur-xs  ">
         <div class="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
             <a href="{% if nav_home %}{% pageurl nav_home %}{% else %}/{% endif %}" class="font-display text-lg font-semibold tracking-tight text-foreground hover:text-primary transition-colors">
@@ -156,6 +158,65 @@
                 dropdowns.forEach(closeDropdown);
             }
         });
+    </script>
+    <script>
+        // Dot-grid spotlight + parallax (see .dot-spotlight in styles.css).
+        // Eases toward the cursor each frame and stops the loop once settled.
+        (function () {
+            const spotlight = document.querySelector("[data-dot-spotlight]");
+            if (!spotlight || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+
+            const root = document.documentElement;
+            const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            const PARALLAX_PX = 6; // max grid nudge each way
+            const EASE = 0.15;
+
+            let target = null; // cursor position, viewport px
+            let current = null;
+            let frame = null;
+
+            // Matches the body's fade layer: dots fully visible down to 20% of
+            // the page height, gone by 80%.
+            const fadeAt = (pageY) => {
+                const t = pageY / root.scrollHeight;
+                return Math.max(0, Math.min(1, (0.8 - t) / 0.6));
+            };
+
+            const render = () => {
+                frame = null;
+                current.x += (target.x - current.x) * EASE;
+                current.y += (target.y - current.y) * EASE;
+                root.style.setProperty("--spot-x", `${current.x}px`);
+                root.style.setProperty("--spot-y", `${current.y}px`);
+                root.style.setProperty("--scroll-y", `${window.scrollY}px`);
+                if (!reduceMotion) {
+                    // Whole px only, so the spotlight's tiles stay exactly on
+                    // top of the body's.
+                    const dx = Math.round((current.x / window.innerWidth - 0.5) * -2 * PARALLAX_PX);
+                    const dy = Math.round((current.y / window.innerHeight - 0.5) * -2 * PARALLAX_PX);
+                    root.style.setProperty("--dot-x", `${dx}px`);
+                    root.style.setProperty("--dot-y", `${dy}px`);
+                }
+                spotlight.style.opacity = fadeAt(current.y + window.scrollY);
+                if (Math.abs(target.x - current.x) > 0.5 || Math.abs(target.y - current.y) > 0.5) {
+                    frame = requestAnimationFrame(render);
+                }
+            };
+            const schedule = () => {
+                if (target && frame === null) frame = requestAnimationFrame(render);
+            };
+
+            document.addEventListener("pointermove", (event) => {
+                if (event.pointerType !== "mouse") return;
+                target = { x: event.clientX, y: event.clientY };
+                if (!current) current = { ...target };
+                schedule();
+            });
+            window.addEventListener("scroll", schedule, { passive: true });
+            document.documentElement.addEventListener("mouseleave", () => {
+                spotlight.style.opacity = 0;
+            });
+        })();
     </script>
     {% block extra_js %}{% endblock %}
 </body>

@@ -7,7 +7,7 @@
         {% if page.subheading %}
         <p class="mb-4 font-mono text-sm uppercase tracking-widest text-secondary">{{ page.subheading }}</p>
         {% endif %}
-        <h1 class="font-display text-4xl font-bold tracking-tight text-foreground sm:text-6xl text-primary glow-primary-subtle">
+        <h1 class="glitch font-display text-4xl font-bold tracking-tight text-foreground sm:text-6xl text-primary glow-primary-subtle" data-text="{{ page.heading|default:page.title }}">
             {{ page.heading|default:page.title }}
         </h1>
         {% if page.aka_name %}
@@ -31,6 +31,44 @@
         </div>
     </div>
 </section>
+
+{% if page.flip_cards %}
+{# Click-to-flip cards (see .flip-card in styles.css). Left edges cycle primary / accent / neon green by position. The front is a button that flips the card; clicking anywhere on the back except its link flips it back (script below). The back's flip-back button is visually hidden until focused, for keyboard users only. #}
+<section>
+    <div class="mx-auto max-w-5xl px-6">
+        <div class="grid gap-6 sm:grid-cols-3">
+            {% for block in page.flip_cards %}
+            {% with card=block.value %}
+            <div class="flip-card" data-flip-card>
+                <div class="flip-card-inner">
+                    <button type="button" data-flip-toggle aria-label="Flip card: {{ card.title }}"
+                            class="flip-card-face flip-card-front group clip-corner flex min-h-64 cursor-pointer flex-col border border-border border-l-2 {% cycle "border-l-primary" "border-l-accent" "border-l-[#39ff14]" %} bg-card p-6 text-left transition-colors hover:border-primary/50">
+                        <span class="font-mono text-xs text-primary">{{ forloop.counter|stringformat:"02d" }}</span>
+                        <span class="mt-4 font-display text-xl font-semibold text-foreground group-hover:text-primary">{{ card.title }}</span>
+                        {% if card.teaser %}
+                        <span class="mt-1 text-sm text-muted-foreground">{{ card.teaser }}</span>
+                        {% endif %}
+                        <span class="mt-auto pt-6 font-mono text-[0.65rem] uppercase tracking-widest text-muted-foreground">Click to flip &#8635;</span>
+                    </button>
+
+                    <div class="flip-card-face flip-card-back clip-corner flex cursor-pointer min-h-64 flex-col border border-primary/50 bg-card p-6 text-left" inert>
+                        <p class="font-mono text-xs uppercase tracking-widest text-primary">{{ forloop.counter|stringformat:"02d" }} // {{ card.title }}</p>
+                        <p class="mt-3 whitespace-pre-line text-sm leading-relaxed text-foreground/90">{{ card.body }}</p>
+                        <div class="mt-auto flex items-center justify-between gap-4 pt-6">
+                            {% if card.link_page %}
+                            <a href="{% pageurl card.link_page %}" class="text-sm font-medium text-primary hover:underline">{{ card.link_text|default:card.link_page.title }} &rarr;</a>
+                            {% endif %}
+                            <button type="button" data-flip-toggle aria-label="Flip back: {{ card.title }}" class="sr-only font-mono text-[0.65rem] uppercase tracking-widest text-muted-foreground focus-visible:not-sr-only">&#8634; Back</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endwith %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
 
 {% if featured_projects %}
 <section>
@@ -59,4 +97,32 @@
     </div>
 </section>
 {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Flip cards: the front (a button) flips the card over; a click anywhere
+    // on the back flips it back, except on its link. The back's own
+    // [data-flip-toggle] button is there for keyboard users, and its click
+    // just bubbles up to the back's handler. The face turned away is made
+    // inert so keyboard focus can't land on it. Focus only follows to the
+    // newly visible face's toggle on a keyboard flip (event.detail is 0 for
+    // Enter/Space "clicks"): on a mouse flip, focusing the back's hidden
+    // button would make it appear.
+    document.querySelectorAll("[data-flip-card]").forEach((card) => {
+        const [front, back] = card.querySelectorAll(".flip-card-face");
+        const flip = (event) => {
+            const flipped = card.classList.toggle("is-flipped");
+            front.inert = flipped;
+            back.inert = !flipped;
+            if (event.detail === 0) {
+                (flipped ? back : front).querySelector("[data-flip-toggle]").focus({ preventScroll: true });
+            }
+        };
+        front.addEventListener("click", flip);
+        back.addEventListener("click", (event) => {
+            if (!event.target.closest("a")) flip(event);
+        });
+    });
+</script>
 {% endblock %}
